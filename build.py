@@ -80,21 +80,51 @@ def pack_sessions() -> None:
         js.unlink()
 
 
-async def collect(child: m.Child) -> dict[str, object]:
+def previous(child: m.Child) -> dict | None:
+    """Ostatnio opublikowane dane dziecka (z GitHub Pages), żeby awaria Librusa nie czyściła ekranu."""
+    base = os.environ.get("PAGES_URL", "").rstrip("/")
+    if not base or DEMO:
+        return None
+    try:
+        import urllib.request
+        with urllib.request.urlopen(f"{base}/data/{child.n}.json", timeout=20) as r:
+            box = json.loads(r.read())
+        key = derive(password_for(child), base64.b64decode(box["salt"]))
+        plain = AESGCM(key).decrypt(base64.b64decode(box["iv"]), base64.b64decode(box["ct"]), None)
+        return json.loads(plain)
+    except Exception as err:
+        print(f"  {child.name}: brak poprzednich danych ({type(err).__name__})")
+        return None
+
+
+SECTIONS = ("today", "grades", "agenda", "messages")
+
+
+async def collect(child: m.Child, stamp: str) -> tuple[dict[str, object], int]:
+    """Zwraca dane i liczbę sekcji pobranych teraz z Librusa."""
     out: dict[str, object] = {"name": child.name}
-    errors = []
-    for key, loader in (("today", m._load_today), ("grades", m._load_grades),
-                        ("agenda", m._load_agenda), ("messages", m._load_messages)):
+    errors, fresh, prev = [], 0, None
+    loaders = (m._load_today, m._load_grades, m._load_agenda, m._load_messages)
+    for key, loader in zip(SECTIONS, loaders):
         try:
-            out[key] = await child.cached(key, loader, False)
+            value = await child.cached(key, loader, False)
+            if isinstance(value, dict):
+                value["asof"] = stamp
+            out[key] = value
+            fresh += 1
         except Exception as err:  # jedna sekcja nie psuje reszty
             errors.append(key)
-            out[key] = None
             print(f"  {child.name}: {key} nie pobrane ({type(err).__name__}: {getattr(err, 'detail', '')})")
+            if prev is None:
+                prev = previous(child) or {}
+            old = prev.get(key)
+            if isinstance(old, dict):
+                old.setdefault("asof", prev.get("generated"))
+            out[key] = old
     if child._librus is not None:
         await child._librus.close()
     out["errors"] = errors
-    return out
+    return out, fresh
 
 
 def password_for(child: m.Child) -> str:
@@ -113,13 +143,12 @@ async def main() -> None:
     (SITE / "data").mkdir()
     unpack_sessions()
     stamp = datetime.now(m.TZ).strftime("%Y-%m-%d %H:%M")
-    kids, failed, everything = [], 0, {}
+    kids, fresh_total, everything = [], 0, {}
     for child in m.CHILDREN.values():
         print(f"- {child.name}")
-        data = await collect(child)
+        data, fresh = await collect(child, stamp)
+        fresh_total += fresh
         data["generated"] = stamp
-        if len(data["errors"]) == 4:  # type: ignore[arg-type]
-            failed += 1
         (SITE / "data" / f"{child.n}.json").write_text(json.dumps(encrypt(data, password_for(child), child.n)), encoding="utf-8")
         kids.append({"n": child.n, "name": child.name})
         everything[str(child.n)] = data
@@ -133,9 +162,15 @@ async def main() -> None:
     (SITE / "data" / "kids.json").write_text(json.dumps({"kids": kids, "parent": bool(parent_pw), "generated": stamp}, ensure_ascii=False), encoding="utf-8")
     (SITE / "config.js").write_text('window.DZ_STATIC = true;\n')
     (SITE / ".nojekyll").write_text("")
-    print(f"Gotowe: {len(kids)} dzieci, {stamp}")
-    if kids and failed == len(kids):
-        raise SystemExit("Żadne konto nie zadziałało.")
+    print(f"Gotowe: {len(kids)} dzieci, {stamp}, świeżych sekcji: {fresh_total}")
+    deploy = fresh_total > 0 or DEMO
+    if not deploy:
+        # Librus nie odpowiada (zdarza się z serwerów GitHuba). Strona zostaje z ostatnimi danymi,
+        # przebieg kończy się bez błędu, żeby nie wysyłać maili co 30 minut.
+        print("::warning::Librus nie odpowiada, strona zostaje bez zmian. Kolejna próba przy następnym przebiegu.")
+    if os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"deploy={'true' if deploy else 'false'}\n")
 
 
 if __name__ == "__main__":

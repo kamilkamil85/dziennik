@@ -75,7 +75,8 @@ async function staticApi(path, refresh) {
   }
   const d = b[tab];
   if (!d) throw { msg: "Tej części nie udało się pobrać z Librusa przy ostatniej aktualizacji." };
-  return { ...d, updated: b.generated };
+  const asof = d.asof || b.generated;
+  return { ...d, updated: asof, stale: asof !== b.generated };
 }
 async function staticUnlock(n, password) {
   const box = await fetchBox(n);
