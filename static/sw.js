@@ -1,5 +1,5 @@
 // Service worker: trzyma pliki aplikacji, żeby otwierała się szybko. Danych z Librusa nie zapisuje.
-const CACHE = "dziennik-v3";
+const CACHE = "dziennik-v4";
 const SHELL = ["./", "style.css", "app.js", "config.js", "manifest.webmanifest", "icon.svg"];
 
 self.addEventListener("install", (e) => {

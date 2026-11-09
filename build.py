@@ -113,7 +113,7 @@ async def main() -> None:
     (SITE / "data").mkdir()
     unpack_sessions()
     stamp = datetime.now(m.TZ).strftime("%Y-%m-%d %H:%M")
-    kids, failed = [], 0
+    kids, failed, everything = [], 0, {}
     for child in m.CHILDREN.values():
         print(f"- {child.name}")
         data = await collect(child)
@@ -122,8 +122,15 @@ async def main() -> None:
             failed += 1
         (SITE / "data" / f"{child.n}.json").write_text(json.dumps(encrypt(data, password_for(child), child.n)), encoding="utf-8")
         kids.append({"n": child.n, "name": child.name})
+        everything[str(child.n)] = data
+    parent_pw = "demo" if DEMO else os.environ.get("RODZIC_HASLO_APP", "")
+    if parent_pw:
+        if len(parent_pw) < 10 and not DEMO:
+            raise SystemExit("RODZIC_HASLO_APP: min. 10 znaków.")
+        # Plik rodzica: dane wszystkich dzieci zaszyfrowane jednym hasłem.
+        (SITE / "data" / "0.json").write_text(json.dumps(encrypt({"kids": everything, "generated": stamp}, parent_pw, 0)), encoding="utf-8")
     pack_sessions()
-    (SITE / "data" / "kids.json").write_text(json.dumps({"kids": kids, "generated": stamp}, ensure_ascii=False), encoding="utf-8")
+    (SITE / "data" / "kids.json").write_text(json.dumps({"kids": kids, "parent": bool(parent_pw), "generated": stamp}, ensure_ascii=False), encoding="utf-8")
     (SITE / "config.js").write_text('window.DZ_STATIC = true;\n')
     (SITE / ".nojekyll").write_text("")
     print(f"Gotowe: {len(kids)} dzieci, {stamp}")

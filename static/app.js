@@ -9,6 +9,7 @@ const DAYS_SHORT = ["nd", "pn", "wt", "śr", "cz", "pt", "sb"];
 function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } }
 
 let kids = [];
+let hasParent = false;
 let kid = Number(store("kid")) || null;
 let tab = store("tab") || "today";
 
@@ -45,14 +46,24 @@ async function fetchBox(n) {
   if (!r.ok) throw { msg: "Nie udało się pobrać danych." };
   return r.json();
 }
+let parentBox = null;
 async function loadBundle(n, refresh) {
   if (bundles[n] && !refresh) return bundles[n];
   const raw = store(`key${n}`);
-  if (!raw) throw { pin: true };
-  const box = await fetchBox(n);
-  try { bundles[n] = await decryptWith(b64d(raw), box); }
-  catch { try { localStorage.removeItem(`key${n}`); } catch {} throw { pin: true }; }
-  return bundles[n];
+  if (raw) {
+    const box = await fetchBox(n);
+    try { bundles[n] = await decryptWith(b64d(raw), box); return bundles[n]; }
+    catch { try { localStorage.removeItem(`key${n}`); } catch {} }
+  }
+  const praw = store("key0"); // tryb rodzica: jeden plik z całą trójką
+  if (praw) {
+    try {
+      if (!parentBox || refresh) parentBox = await decryptWith(b64d(praw), await fetchBox(0));
+      const d = parentBox.kids[String(n)];
+      if (d) { bundles[n] = d; return d; }
+    } catch { try { localStorage.removeItem("key0"); } catch {} }
+  }
+  throw { pin: true };
 }
 async function staticApi(path, refresh) {
   const [n, tab, id] = path.split("/");
@@ -69,7 +80,8 @@ async function staticApi(path, refresh) {
 async function staticUnlock(n, password) {
   const box = await fetchBox(n);
   const raw = await deriveKey(password, b64d(box.salt), box.iter);
-  bundles[n] = await decryptWith(raw, box); // rzuci błąd przy złym haśle
+  const data = await decryptWith(raw, box); // rzuci błąd przy złym haśle
+  if (n === 0) parentBox = data; else bundles[n] = data;
   store(`key${n}`, b64e(raw)); // zapamiętujemy klucz, nie hasło
 }
 
@@ -233,14 +245,21 @@ function renderPin(child) {
   view.innerHTML = `<div class="pin"><p>Cześć, <b>${esc(child.name)}</b>! Podaj ${what}.</p>
     <form id="pinf">${input}<br>
     <button class="btn">Wejdź</button><p id="pinerr" class="small" style="color:var(--warn)"></p>
-    ${STATIC ? '<p class="small muted">Telefon zapamięta je, wpisujesz tylko raz.</p>' : ""}</form></div>`;
+    ${STATIC ? '<p class="small muted">Telefon zapamięta je, wpisujesz tylko raz.</p>' : ""}
+    ${STATIC && hasParent && !child.parent ? '<button type="button" id="asparent" class="kid" style="margin-top:18px">Jestem rodzicem</button>' : ""}</form></div>`;
+  const ap = $("#asparent");
+  if (ap) ap.onclick = () => renderPin({ n: 0, name: "rodzicu", parent: true, back: child });
   $("#pini").focus();
   $("#pinf").onsubmit = async (ev) => {
     ev.preventDefault();
     const btn = $("#pinf .btn"); btn.disabled = true;
     try {
       if (STATIC) {
-        try { await staticUnlock(child.n, $("#pini").value); child.locked = false; show(); }
+        try {
+          await staticUnlock(child.n, $("#pini").value);
+          if (child.parent) kids.forEach((k) => (k.locked = false)); else child.locked = false;
+          show();
+        }
         catch { $("#pinerr").textContent = "Złe hasło."; $("#pini").value = ""; }
         return;
       }
@@ -302,7 +321,8 @@ view.onclick = (e) => {
   try {
     if (STATIC) {
       const k = await (await fetch(`data/kids.json?t=${Date.now()}`, { cache: "no-store" })).json();
-      kids = k.kids.map((x) => ({ ...x, locked: !store(`key${x.n}`) }));
+      hasParent = !!k.parent;
+      kids = k.kids.map((x) => ({ ...x, locked: !store(`key${x.n}`) && !store("key0") }));
     } else kids = await (await fetch("api/children")).json();
   } catch { view.innerHTML = errorCard("Brak połączenia z serwerem."); return; }
   if (!kids.some((k) => k.n === kid)) kid = kids[0]?.n ?? null;

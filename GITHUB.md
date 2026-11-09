@@ -12,6 +12,7 @@ GitHub Actions co 30 minut w dni szkolne (w weekend co 3 godziny) loguje się do
    |---|---|
    | `LIBRUS1_LOGIN`, `LIBRUS1_HASLO` | login i hasło Librusa (tak samo dla 2 i 3) |
    | `DZIECKO1_HASLO_APP` | hasło do aplikacji dla dziecka 1, **min. 10 znaków**, najlepiej 3–4 losowe słowa (tak samo dla 2 i 3) |
+   | `RODZIC_HASLO_APP` | (opcjonalnie) hasło rodzica, min. 10 znaków. Odblokowuje całą trójkę naraz, przycisk „Jestem rodzicem” na ekranie logowania |
    | `SESSION_KEY` | dowolny długi losowy ciąg, np. z generatora haseł (40+ znaków) |
    | `WAZNI_NADAWCY` | np. `nowak jan,kowalska anna` |
 

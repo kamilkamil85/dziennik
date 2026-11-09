@@ -55,6 +55,7 @@ jobs:
           DZIECKO1_HASLO_APP: ${{ secrets.DZIECKO1_HASLO_APP }}
           DZIECKO2_HASLO_APP: ${{ secrets.DZIECKO2_HASLO_APP }}
           DZIECKO3_HASLO_APP: ${{ secrets.DZIECKO3_HASLO_APP }}
+          RODZIC_HASLO_APP: ${{ secrets.RODZIC_HASLO_APP }}
           DZIECKO1_IMIE: ${{ vars.DZIECKO1_IMIE }}
           DZIECKO2_IMIE: ${{ vars.DZIECKO2_IMIE }}
           DZIECKO3_IMIE: ${{ vars.DZIECKO3_IMIE }}
