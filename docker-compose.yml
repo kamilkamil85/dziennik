@@ -1,0 +1,44 @@
+# Jedna aplikacja, trzy sposoby dostępu. Wybierz jeden profil:
+#   docker compose --profile tailscale up -d --build     -> https://dziennik.<tailnet>.ts.net (tylko w Tailscale)
+#   docker compose --profile cloudflare up -d --build    -> https://twoja-subdomena (Cloudflare Tunnel, bez otwierania portów)
+#   docker compose up -d --build                         -> 127.0.0.1:8000, a HTTPS robi Twój reverse proxy (Caddy/nginx/Traefik)
+
+services:
+  dziennik:
+    build: .
+    container_name: dziennik
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      COOKIE_SECURE: "1"   # we wszystkich wariantach jest HTTPS
+    volumes:
+      - ./data:/data
+    ports:
+      - "127.0.0.1:${DZIENNIK_PORT:-8000}:8000"
+
+  tailscale:
+    profiles: ["tailscale"]
+    image: tailscale/tailscale:stable
+    container_name: dziennik-tailscale
+    hostname: dziennik
+    restart: unless-stopped
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY:?Ustaw TS_AUTHKEY w pliku .env}
+      TS_HOSTNAME: dziennik
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_SERVE_CONFIG: /config/serve.json
+      TS_USERSPACE: "true"
+    volumes:
+      - ./tailscale/state:/var/lib/tailscale
+      - ./tailscale/serve.json:/config/serve.json:ro
+    depends_on: [dziennik]
+
+  cloudflared:
+    profiles: ["cloudflare"]
+    image: cloudflare/cloudflared:latest
+    container_name: dziennik-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Ustaw CLOUDFLARE_TUNNEL_TOKEN w pliku .env}
+    depends_on: [dziennik]

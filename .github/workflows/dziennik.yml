@@ -1,0 +1,79 @@
+name: Dziennik
+
+on:
+  schedule:
+    # Godziny w UTC (Polska zimą = UTC+1, latem = UTC+2).
+    - cron: "*/30 5-19 * * 1-5"   # dni szkolne: co 30 min, ok. 6:00-21:00
+    - cron: "0 7-19/3 * * 0,6"    # weekend: co 3 godziny
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: write   # tylko do podtrzymania harmonogramu (krok "keepalive")
+
+concurrency:
+  group: dziennik
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Sesje Librusa między uruchomieniami (zaszyfrowane kluczem SESSION_KEY),
+      # żeby nie logować się hasłem przy każdym uruchomieniu.
+      - uses: actions/cache@v4
+        with:
+          path: data
+          key: librus-session-${{ github.run_id }}
+          restore-keys: librus-session-
+
+      - name: Pobierz dane z Librusa i zaszyfruj
+        env:
+          DATA_DIR: data
+          SESSION_KEY: ${{ secrets.SESSION_KEY }}
+          LIBRUS1_LOGIN: ${{ secrets.LIBRUS1_LOGIN }}
+          LIBRUS1_HASLO: ${{ secrets.LIBRUS1_HASLO }}
+          LIBRUS2_LOGIN: ${{ secrets.LIBRUS2_LOGIN }}
+          LIBRUS2_HASLO: ${{ secrets.LIBRUS2_HASLO }}
+          LIBRUS3_LOGIN: ${{ secrets.LIBRUS3_LOGIN }}
+          LIBRUS3_HASLO: ${{ secrets.LIBRUS3_HASLO }}
+          DZIECKO1_HASLO_APP: ${{ secrets.DZIECKO1_HASLO_APP }}
+          DZIECKO2_HASLO_APP: ${{ secrets.DZIECKO2_HASLO_APP }}
+          DZIECKO3_HASLO_APP: ${{ secrets.DZIECKO3_HASLO_APP }}
+          DZIECKO1_IMIE: ${{ vars.DZIECKO1_IMIE }}
+          DZIECKO2_IMIE: ${{ vars.DZIECKO2_IMIE }}
+          DZIECKO3_IMIE: ${{ vars.DZIECKO3_IMIE }}
+          WAZNI_NADAWCY: ${{ secrets.WAZNI_NADAWCY }}
+        run: python build.py
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      # GitHub wyłącza harmonogram po 60 dniach bez zmian w repo. Raz dziennie włączamy go ponownie.
+      - name: keepalive
+        if: github.event.schedule == '*/30 5-19 * * 1-5' && github.run_attempt == 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(date -u +%H%M)" \< "0530" ]; then
+            gh api -X PUT "repos/${{ github.repository }}/actions/workflows/dziennik.yml/enable" || true
+          fi
