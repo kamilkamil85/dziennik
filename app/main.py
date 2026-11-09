@@ -125,6 +125,7 @@ class Child:
                 self.bad_login_until = time.time() + 1800
                 raise HTTPException(502, "Librus nie przyjął loginu lub hasła tego dziecka.")
             except LibrusError as err:
+                print(f"[librus] {self.name}/{key}: {type(err).__name__}: {err!r} cause={err.__cause__!r}", flush=True)
                 if hit:  # Librus nie odpowiada: pokaż ostatnie dane zamiast błędu
                     stale = dict(hit[1]) if isinstance(hit[1], dict) else hit[1]
                     if isinstance(stale, dict):

@@ -42,6 +42,15 @@ jobs:
           key: librus-session-${{ github.run_id }}
           restore-keys: librus-session-
 
+      - name: Diagnostyka sieci (Librus)
+        continue-on-error: true
+        run: |
+          curl -s https://ipinfo.io/country || true; echo
+          for u in https://synergia.librus.pl/loguj/portalRodzina https://api.librus.pl/OAuth/Authorization?client_id=46 https://synergia.librus.pl/gateway/api/2.0/Me; do
+            curl -s -o /dev/null -m 20 -w "%{http_code} %{time_total}s $u
+" "$u" || echo "BLAD $u"
+          done
+
       - name: Pobierz dane z Librusa i zaszyfruj
         env:
           DATA_DIR: data
