@@ -90,3 +90,34 @@ dialog { border: 0; border-radius: 20px; padding: 18px; width: min(560px, calc(1
 dialog::backdrop { background: rgba(0,0,0,.45); }
 dialog form { text-align: right; }
 .tabs .ti.txt { font-size: 15px; font-weight: 800; line-height: 1.55; }
+
+/* ---------- motywy dzieci ---------- */
+:root { --bar: var(--brand); --stripe: none; }
+.top { border-bottom: 4px solid transparent; border-image: var(--stripe); border-image-slice: 1; }
+.top:has(+ main) { transition: background .2s; }
+
+/* Tadek: Legia Warszawa, zielony-biały-czerwony */
+:root[data-theme="legia"] {
+  --bg: #f3f6f3; --brand: #0b7a3e; --brand-ink: #ffffff; --chip: #e4ece6; --line: #d7e2da;
+  --bar: #0b7a3e; --stripe: linear-gradient(90deg, #0b7a3e 0 33.3%, #ffffff 33.3% 66.6%, #c8102e 66.6%);
+}
+:root[data-theme="legia"] .tabs { border-top: 3px solid #c8102e; }
+:root[data-theme="legia"] .lucky, :root[data-theme="legia"] .kid.on { box-shadow: inset 0 -3px 0 #c8102e; }
+
+/* Hela: fioletowy */
+:root[data-theme="fiolet"] {
+  --bg: #f5f2fa; --brand: #6b3fa0; --brand-ink: #ffffff; --chip: #ebe4f5; --line: #ddd3ec; --bar: #6b3fa0;
+  --stripe: linear-gradient(90deg, #6b3fa0, #a678d6);
+}
+
+/* Jadzia: beże i róże */
+:root[data-theme="roz"] {
+  --bg: #f7f0e8; --card: #fffaf5; --brand: #b04a6e; --brand-ink: #ffffff; --chip: #f0e3d6; --line: #e7d8c9; --bar: #b04a6e;
+  --stripe: linear-gradient(90deg, #e8cfb8, #e9a6bb, #b04a6e);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="legia"] { --bg: #0f1612; --card: #18211b; --brand: #2fb36a; --brand-ink: #07140c; --chip: #223027; --line: #2a3a2f; --bar: #0b5a2e; }
+  :root[data-theme="fiolet"] { --bg: #141019; --card: #1e1826; --brand: #b28ae6; --brand-ink: #160d22; --chip: #2a2236; --line: #342a42; --bar: #4a2a72; }
+  :root[data-theme="roz"] { --bg: #18130f; --card: #231c17; --brand: #eb98b3; --brand-ink: #24121a; --chip: #33291f; --line: #3d3127; --bar: #8a3d57; }
+}

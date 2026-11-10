@@ -295,8 +295,17 @@ async function show(refresh = false) {
   }
 }
 
+// Kolory każdego dziecka (po numerze z konfiguracji: 1 = Tadek, 2 = Hela, 3 = Jadzia).
+const THEMES = { 1: "legia", 2: "fiolet", 3: "roz" };
+function applyTheme() {
+  const t = THEMES[kid] || "";
+  document.documentElement.dataset.theme = t;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue("--bar").trim() || "#1f6f5c";
+}
 function drawKids() {
   $("#kids").innerHTML = kids.map((k) => `<button class="kid${k.n === kid ? " on" : ""}" data-n="${k.n}">${esc(k.name)}</button>`).join("");
+  applyTheme();
 }
 
 $("#kids").onclick = (e) => {
