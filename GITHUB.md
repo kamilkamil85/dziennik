@@ -52,3 +52,5 @@ Wbudowany harmonogram GitHuba w darmowych repo często pomija uruchomienia (zdar
 - Zapisz i kliknij **Test run**. Poprawna odpowiedź to **204**, a w zakładce Actions pojawi się nowy przebieg.
 
 Wbudowany harmonogram może zostać. Przebiegi nigdy nie idą jednocześnie, bo GitHub uruchamia je po kolei.
+
+**Odnowienie tokenu:** wygeneruj nowy token tak samo, podmień go w cron-job.org (nagłówek `Authorization`), a nową datę ważności wpisz w repo: **Settings → Secrets and variables → Actions → Variables → `TOKEN_WAZNY_DO`**, w formacie `RRRR-MM-DD`. Aplikacja w trybie rodzica pokazuje tę datę pod godziną aktualizacji, a 14 dni przed końcem wyświetla ją na czerwono.

@@ -121,3 +121,4 @@ dialog form { text-align: right; }
   :root[data-theme="fiolet"] { --bg: #141019; --card: #1e1826; --brand: #b28ae6; --brand-ink: #160d22; --chip: #2a2236; --line: #342a42; --bar: #4a2a72; }
   :root[data-theme="roz"] { --bg: #18130f; --card: #231c17; --brand: #eb98b3; --brand-ink: #24121a; --chip: #33291f; --line: #3d3127; --bar: #8a3d57; }
 }
+.meta.warn { color: var(--warn); font-weight: 600; }

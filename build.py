@@ -159,7 +159,8 @@ async def main() -> None:
         # Plik rodzica: dane wszystkich dzieci zaszyfrowane jednym hasłem.
         (SITE / "data" / "0.json").write_text(json.dumps(encrypt({"kids": everything, "generated": stamp}, parent_pw, 0)), encoding="utf-8")
     pack_sessions()
-    (SITE / "data" / "kids.json").write_text(json.dumps({"kids": kids, "parent": bool(parent_pw), "generated": stamp}, ensure_ascii=False), encoding="utf-8")
+    (SITE / "data" / "kids.json").write_text(json.dumps({"kids": kids, "parent": bool(parent_pw), "generated": stamp,
+                    "token_until": os.environ.get("TOKEN_WAZNY_DO", "")}, ensure_ascii=False), encoding="utf-8")
     (SITE / "config.js").write_text('window.DZ_STATIC = true;\n')
     (SITE / ".nojekyll").write_text("")
     print(f"Gotowe: {len(kids)} dzieci, {stamp}, świeżych sekcji: {fresh_total}")

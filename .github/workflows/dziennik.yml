@@ -69,6 +69,8 @@ jobs:
           DZIECKO2_IMIE: ${{ vars.DZIECKO2_IMIE }}
           DZIECKO3_IMIE: ${{ vars.DZIECKO3_IMIE }}
           WAZNI_NADAWCY: ${{ secrets.WAZNI_NADAWCY }}
+          # Do kiedy ważny jest token GitHuba w cron-job.org (RRRR-MM-DD). Po odnowieniu ustaw zmienną TOKEN_WAZNY_DO.
+          TOKEN_WAZNY_DO: ${{ vars.TOKEN_WAZNY_DO || '2027-02-09' }}
         run: python build.py
 
       - uses: actions/upload-pages-artifact@v3

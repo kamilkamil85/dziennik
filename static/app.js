@@ -10,6 +10,7 @@ function store(k, v) { try { if (v === undefined) return localStorage.getItem(k)
 
 let kids = [];
 let hasParent = false;
+let kidsMeta = {};
 let kid = Number(store("kid")) || null;
 let tab = store("tab") || "today";
 
@@ -102,7 +103,24 @@ function loading() { view.innerHTML = '<div class="skeleton"></div>'.repeat(4); 
 function errorCard(msg) { return `<div class="card error">${esc(msg)}</div>`; }
 function footer(data) {
   if (!data.updated) return "";
-  return `<p class="meta">${STATIC ? "Dane z Librusa z" : "Pobrano o"} ${esc(data.updated)}${data.stale ? " · Librus nie odpowiada, to ostatnie zapisane dane" : ""}</p>`;
+  let h = `<p class="meta">${STATIC ? "Dane z Librusa z" : "Pobrano o"} ${esc(data.updated)}${data.stale ? " · Librus nie odpowiada, to ostatnie zapisane dane" : ""}</p>`;
+  const now = new Date();
+  // Ostrzeżenie o starych danych: w ciągu dnia (7-21) dane starsze niż 3 godziny.
+  const when = /^\d{4}-\d\d-\d\d \d\d:\d\d$/.test(data.updated) ? new Date(data.updated.replace(" ", "T")) : null;
+  if (when && now.getHours() >= 7 && now.getHours() < 21 && now - when > 3 * 3600e3) {
+    h += `<p class="meta warn">⚠ Dane mogą być nieaktualne. Sprawdź w Librusie.</p>`;
+  }
+  // Tylko dla rodzica: do kiedy ważny jest token GitHuba używany przez cron-job.org.
+  if (STATIC && store("key0") && kidsMeta.token_until) {
+    const until = new Date(kidsMeta.token_until + "T23:59:59");
+    const left = Math.ceil((until - now) / 864e5);
+    const label = until.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" });
+    const txt = left < 0 ? `Token GitHuba wygasł ${label}. Wygeneruj nowy i wpisz go w cron-job.org.`
+      : left <= 14 ? `Token GitHuba wygasa ${label} (za ${left} dni). Pora go odnowić.`
+      : `Token GitHuba ważny do ${label}`;
+    h += `<p class="meta${left <= 14 ? " warn" : ""}">${esc(txt)}</p>`;
+  }
+  return h;
 }
 
 // ---------- ekrany ----------
@@ -334,6 +352,7 @@ view.onclick = (e) => {
   try {
     if (STATIC) {
       const k = await (await fetch(`data/kids.json?t=${Date.now()}`, { cache: "no-store" })).json();
+      kidsMeta = k;
       hasParent = !!k.parent;
       kids = k.kids.map((x) => ({ ...x, locked: !store(`key${x.n}`) && !store("key0") }));
     } else kids = await (await fetch("api/children")).json();
