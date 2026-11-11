@@ -109,8 +109,11 @@ function footer(data) {
 
 function renderToday(d) {
   let h = "";
-  if (!d.days.length) h += `<div class="card empty">Brak lekcji w najbliższych dniach 🎉</div>`;
-  for (const day of d.days) {
+  // Pomijamy dni, które już minęły (dane mogły zostać pobrane wczoraj), i pokazujemy dwa najbliższe.
+  const now = new Date(), todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const days = d.days.filter((x) => x.date >= todayIso).slice(0, 2);
+  if (!days.length) h += `<div class="card empty">Brak lekcji w najbliższych dniach 🎉</div>`;
+  for (const day of days) {
     h += `<h2>${esc(dayLabel(day.date))}</h2><div class="card">`;
     for (const l of day.lessons) {
       const tags = (l.canceled ? '<span class="tag cancel">odwołana</span>' : "") +

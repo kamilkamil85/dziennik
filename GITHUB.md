@@ -25,4 +25,30 @@ GitHub Actions co 30 minut w dni szkolne (w weekend co 3 godziny) loguje się do
 - Zmiana `DZIECKO*_HASLO_APP` wylogowuje telefon tego dziecka i trzeba wpisać nowe hasło.
 - Wiadomości mają skróconą treść, taką jak na liście w Librusie. Aplikacja nie otwiera ich w Librusie, więc nie zmienia ich statusu na przeczytane.
 - GitHub uruchamia zadania z harmonogramu z opóźnieniem, czasem 10–20 minut.
-- Jeśli Librus odrzuci hasło, przebieg w zakładce Actions będzie czerwony, a GitHub wyśle Ci maila.
+- Gdy Librus nie odpowiada albo odrzuci hasło, przebieg jest zielony z ostrzeżeniem, a strona zostaje z ostatnimi danymi. O tym, jak świeże są dane, mówi godzina na dole ekranu w aplikacji.
+
+## Pewniejszy harmonogram: cron-job.org
+
+Wbudowany harmonogram GitHuba w darmowych repo często pomija uruchomienia (zdarza się 1–2 razy na dobę zamiast co 30 minut). Darmowy serwis cron-job.org może wywoływać workflow punktualnie.
+
+**1. Token GitHuba (tylko do uruchamiania tego workflow)**
+- github.com → zdjęcie profilu → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**
+- Nazwa: `cron-dziennik`, Expiration: 1 rok (wpisz sobie w kalendarz odnowienie)
+- Repository access: **Only select repositories → dziennik**
+- Permissions → Repository permissions → **Actions: Read and write** (nic więcej)
+- Skopiuj token (`github_pat_...`). Zobaczysz go tylko raz.
+
+**2. Zadanie w cron-job.org**
+- Załóż konto na https://cron-job.org i kliknij **Create cronjob**
+- URL: `https://api.github.com/repos/kamilkamil85/dziennik/actions/workflows/dziennik.yml/dispatches`
+- Schedule: **Custom**: co 30 minut, godziny 6–21, strefa czasowa **Europe/Warsaw**
+- Zakładka **Advanced**:
+  - Request method: **POST**
+  - Headers:
+    - `Authorization`: `Bearer github_pat_...` (Twój token)
+    - `Accept`: `application/vnd.github+json`
+    - `X-GitHub-Api-Version`: `2022-11-28`
+  - Request body: `{"ref":"main"}`
+- Zapisz i kliknij **Test run**. Poprawna odpowiedź to **204**, a w zakładce Actions pojawi się nowy przebieg.
+
+Wbudowany harmonogram może zostać. Przebiegi nigdy nie idą jednocześnie, bo GitHub uruchamia je po kolei.
