@@ -122,3 +122,8 @@ dialog form { text-align: right; }
   :root[data-theme="roz"] { --bg: #18130f; --card: #231c17; --brand: #eb98b3; --brand-ink: #24121a; --chip: #33291f; --line: #3d3127; --bar: #8a3d57; }
 }
 .meta.warn { color: var(--warn); font-weight: 600; }
+.tag.ev-test { background: #d9342b; color: #fff; }
+.tag.ev-quiz { background: #f2a33a; color: #2b1a00; }
+.tag.ev-info { background: var(--chip); color: var(--muted); }
+.ev-line { color: var(--ink); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lesson.has-ev { cursor: pointer; }

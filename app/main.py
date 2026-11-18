@@ -272,15 +272,63 @@ async def _load_today(lib: Librus) -> dict[str, Any]:
             })
     soon.sort(key=lambda e: e["date"])
     me = await lib.me()
+    out_days = []
+    for d in days:
+        lessons = [_lesson(l, subjects, teachers, rooms) for l in week[d]]
+        _attach_events(d, week[d], lessons, agenda, cats)
+        out_days.append({"date": d.isoformat(), "lessons": lessons})
     return {
         "student": f"{me.first_name} {me.last_name}".strip(),
         "today": today.isoformat(),
-        "days": [
-            {"date": d.isoformat(), "lessons": [_lesson(l, subjects, teachers, rooms) for l in week[d]]}
-            for d in days
-        ],
+        "days": out_days,
         "soon": soon,
     }
+
+
+# Etykiety wydarzeń z terminarza przy lekcjach. Klucz: fragment nazwy kategorii w Librusie (małe litery).
+EVENT_LABELS = [
+    ("popraw", "poprawa", "test"),
+    ("praca klasowa", "klasówka", "test"),
+    ("klasówka", "klasówka", "test"),
+    ("sprawdzian", "sprawdzian", "test"),
+    ("kartkówka", "kartkówka", "quiz"),
+    ("odpowied", "odpytywanie", "quiz"),
+    ("termin", "termin", "info"),
+]
+
+
+def _event_label(category: str) -> tuple[str, str]:
+    low = category.lower()
+    for key, label, kind in EVENT_LABELS:
+        if key in low:
+            return label, kind
+    return "info", "info"
+
+
+def _hhmm(t: str | None) -> str:
+    if not t:
+        return ""
+    parts = t.split(":")
+    return f"{int(parts[0])}:{parts[1]}" if len(parts) >= 2 and parts[0].isdigit() else t
+
+
+def _attach_events(day: date, raw: list, lessons: list[dict[str, Any]], agenda: list, cats: dict) -> None:
+    """Dopisuje do lekcji wydarzenia z terminarza: ten sam dzień i przedmiot, a przy kilku lekcjach
+    tego przedmiotu ta, która zaczyna się o godzinie wydarzenia."""
+    iso = day.isoformat()
+    for ev in agenda:
+        if ev.date != iso or ev.subject_id is None:
+            continue
+        idx = [i for i, l in enumerate(raw) if str(l.subject_id) == str(ev.subject_id)]
+        if not idx:
+            continue
+        at = [i for i in idx if _hhmm(raw[i].hour_from) == _hhmm(ev.time_from)]
+        i = (at or idx)[0]
+        category = cats.get(ev.category_id, "") if ev.category_id else ""
+        label, kind = _event_label(category)
+        lessons[i].setdefault("events", []).append(
+            {"label": label, "kind": kind, "category": category, "content": ev.content}
+        )
 
 
 async def _load_grades(lib: Librus) -> dict[str, Any]:

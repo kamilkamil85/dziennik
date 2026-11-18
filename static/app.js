@@ -11,6 +11,7 @@ function store(k, v) { try { if (v === undefined) return localStorage.getItem(k)
 let kids = [];
 let hasParent = false;
 let kidsMeta = {};
+let todayDays = [];
 let kid = Number(store("kid")) || null;
 let tab = store("tab") || "today";
 
@@ -131,16 +132,20 @@ function renderToday(d) {
   const now = new Date(), todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const days = d.days.filter((x) => x.date >= todayIso).slice(0, 2);
   if (!days.length) h += `<div class="card empty">Brak lekcji w najbliższych dniach 🎉</div>`;
-  for (const day of days) {
+  todayDays = days;
+  for (const [dayIdx, day] of days.entries()) {
     h += `<h2>${esc(dayLabel(day.date))}</h2><div class="card">`;
-    for (const l of day.lessons) {
+    for (const [lessonIdx, l] of day.lessons.entries()) {
       const tags = (l.canceled ? '<span class="tag cancel">odwołana</span>' : "") +
-        (l.substitution ? '<span class="tag subst">zastępstwo</span>' : "");
+        (l.substitution ? '<span class="tag subst">zastępstwo</span>' : "") +
+        (l.events || []).map((e) => `<span class="tag ev-${esc(e.kind)}">${esc(e.label)}</span>`).join("");
+      const evLine = (l.events || []).filter((e) => e.content).map((e) => esc(e.content)).join(" · ");
       const extra = [l.room && (/^sala/i.test(l.room) ? l.room : `sala ${l.room}`), l.teacher, l.original && l.original !== l.subject && `zamiast: ${l.original}`]
         .filter(Boolean).map(esc).join(" · ");
-      h += `<div class="lesson${l.canceled ? " canceled" : ""}">
+      const evAttr = l.events ? ` data-ev="${dayIdx}:${lessonIdx}"` : "";
+      h += `<div class="lesson${l.canceled ? " canceled" : ""}${l.events ? " has-ev" : ""}"${evAttr}>
         <div class="no">${l.no ?? ""}</div>
-        <div><div class="subj">${esc(l.subject)}${tags}</div><div class="small muted">${extra}</div></div>
+        <div><div class="subj">${esc(l.subject)}${tags}</div><div class="small muted">${extra}</div>${evLine ? `<div class="small ev-line">${evLine}</div>` : ""}</div>
         <div class="time">${esc(l.from || "")}<br>${esc(l.to || "")}</div></div>`;
     }
     h += `</div>`;
@@ -341,6 +346,13 @@ document.querySelector(".tabs").onclick = (e) => {
 };
 $("#refresh").onclick = () => show(true);
 view.onclick = (e) => {
+  const ev = e.target.closest(".lesson[data-ev]");
+  if (ev) {
+    const [di, li] = ev.dataset.ev.split(":").map(Number), l = todayDays[di].lessons[li];
+    return openSheet(`<p class="muted small">${esc(dayLabel(todayDays[di].date))} · lekcja ${esc(l.no ?? "")} · ${esc(l.from || "")}</p>
+      <h3 style="margin-top:0">${esc(l.subject)}</h3>` + l.events.map((x) =>
+        `<p><span class="tag ev-${esc(x.kind)}" style="margin-left:0">${esc(x.label)}</span> <span class="muted small">${esc(x.category)}</span></p><div class="content">${esc(x.content)}</div>`).join(""));
+  }
   const s = e.target.closest(".subject"); if (s) return subjectSheet(Number(s.dataset.i));
   const n = e.target.closest(".notice");
   if (n) { const a = msgData.notices[Number(n.dataset.n)]; return openSheet(`<h3 style="margin-top:0">${esc(a.subject)}</h3><div class="content">${esc(a.content)}</div>`); }

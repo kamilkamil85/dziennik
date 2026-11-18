@@ -23,6 +23,10 @@ def today(name: str) -> dict[str, Any]:
                         "original": "Biologia" if i == 5 else None})
         if i == 5:
             lessons[-1]["subject"] = "Język angielski"
+        if i == 1:
+            lessons[-1]["events"] = [{"label": "klasówka", "kind": "test", "category": "Praca klasowa", "content": "Ułamki dziesiętne, dział 3"}]
+        if i == 2:
+            lessons[-1]["events"] = [{"label": "kartkówka", "kind": "quiz", "category": "Kartkówka", "content": "Lektura: rozdziały 1-4"}]
     return {
         "student": name, "today": _d(0),
         "days": [{"date": _d(0), "lessons": lessons}, {"date": _d(1), "lessons": [dict(l, canceled=False, substitution=False, original=None) for l in lessons[:4]]}],
