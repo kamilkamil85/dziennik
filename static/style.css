@@ -110,16 +110,10 @@ dialog form { text-align: right; }
   --stripe: linear-gradient(90deg, #6b3fa0, #a678d6);
 }
 
-/* Jadzia: beże i róże */
-:root[data-theme="roz"] {
-  --bg: #f7f0e8; --card: #fffaf5; --brand: #b04a6e; --brand-ink: #ffffff; --chip: #f0e3d6; --line: #e7d8c9; --bar: #b04a6e;
-  --stripe: linear-gradient(90deg, #e8cfb8, #e9a6bb, #b04a6e);
-}
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme="legia"] { --bg: #0f1612; --card: #18211b; --brand: #2fb36a; --brand-ink: #07140c; --chip: #223027; --line: #2a3a2f; --bar: #0b5a2e; }
   :root[data-theme="fiolet"] { --bg: #141019; --card: #1e1826; --brand: #b28ae6; --brand-ink: #160d22; --chip: #2a2236; --line: #342a42; --bar: #4a2a72; }
-  :root[data-theme="roz"] { --bg: #18130f; --card: #231c17; --brand: #eb98b3; --brand-ink: #24121a; --chip: #33291f; --line: #3d3127; --bar: #8a3d57; }
 }
 .meta.warn { color: var(--warn); font-weight: 600; }
 .tag.ev-test { background: #d9342b; color: #fff; }
@@ -127,3 +121,52 @@ dialog form { text-align: right; }
 .tag.ev-info { background: var(--chip); color: var(--muted); }
 .ev-line { color: var(--ink); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .lesson.has-ev { cursor: pointer; }
+
+/* Jadzia: czarodziejska szkoła - pergamin, bordo i złoto */
+:root[data-theme="magia"] {
+  --bg: #efe2c0; --card: #f8eed6; --ink: #3b2614; --muted: #7a6142; --line: #dcc79a;
+  --brand: #7a1420; --brand-ink: #f7e6b5; --chip: #e6d3a6; --bar: #5c0f18; --gold: #b8892a;
+  --stripe: linear-gradient(90deg, #5c0f18, #b8892a 50%, #5c0f18);
+}
+:root[data-theme="magia"] body {
+  font-family: "Crimson Pro", Georgia, serif; font-size: 17px;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(255,255,255,.5), transparent 60%),
+    radial-gradient(ellipse at 100% 100%, rgba(122,80,30,.15), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+}
+:root[data-theme="magia"] h2,
+:root[data-theme="magia"] .subj,
+:root[data-theme="magia"] .kid,
+:root[data-theme="magia"] .tabs button,
+:root[data-theme="magia"] .cat,
+:root[data-theme="magia"] .btn,
+:root[data-theme="magia"] h3 { font-family: "Cinzel", Georgia, serif; letter-spacing: .02em; }
+:root[data-theme="magia"] h2 { color: var(--brand); }
+:root[data-theme="magia"] h2::before { content: "✦ "; color: var(--gold); }
+:root[data-theme="magia"] .card { border: 1px solid var(--line); box-shadow: 0 1px 0 var(--line), inset 0 0 24px rgba(122,80,30,.07); }
+:root[data-theme="magia"] .kid.on { box-shadow: inset 0 0 0 2px var(--gold); }
+:root[data-theme="magia"] .tabs { border-top: 2px solid var(--gold); }
+:root[data-theme="magia"] .kid { padding: 8px 12px; }
+:root[data-theme="magia"] .meta::before { content: "✧ "; color: var(--gold); }
+:root[data-theme="magia"] .date-box { background: var(--brand); color: var(--brand-ink); }
+:root[data-theme="magia"] .date-box span { color: var(--brand-ink); opacity: .8; }
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="magia"] {
+    --bg: #12151f; --card: #1b1f2c; --ink: #efe2c0; --muted: #b3a585; --line: #2e3344;
+    --brand: #d9a93c; --brand-ink: #1a1206; --chip: #262b3a; --bar: #3a0a10; --gold: #d9a93c;
+  }
+  :root[data-theme="magia"] body {
+    background:
+      radial-gradient(1px 1px at 12% 18%, #fff8 50%, transparent 51%),
+      radial-gradient(1px 1px at 72% 9%, #fff6 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 40% 60%, #fff5 50%, transparent 51%),
+      radial-gradient(1px 1px at 88% 75%, #fff7 50%, transparent 51%),
+      radial-gradient(ellipse at 50% 0%, #2a2140, transparent 70%),
+      var(--bg);
+    background-attachment: fixed;
+  }
+  :root[data-theme="magia"] h2 { color: var(--gold); }
+}

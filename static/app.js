@@ -322,7 +322,7 @@ async function show(refresh = false) {
 }
 
 // Kolory każdego dziecka (po numerze z konfiguracji: 1 = Tadek, 2 = Hela, 3 = Jadzia).
-const THEMES = { 1: "legia", 2: "fiolet", 3: "roz" };
+const THEMES = { 1: "legia", 2: "fiolet", 3: "magia" };
 function applyTheme() {
   const t = THEMES[kid] || "";
   document.documentElement.dataset.theme = t;
