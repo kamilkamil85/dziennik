@@ -136,7 +136,7 @@ function renderToday(d) {
   for (const [dayIdx, day] of days.entries()) {
     const lucky = LUCKY_KIDS.includes(kid) && d.lucky && d.lucky.day === day.date
       ? `<span class="lucky-chip" title="Szczęśliwy numerek">🍀 szczęśliwy numerek: <b>${esc(d.lucky.number)}</b></span>` : "";
-    h += `<h2 class="day-head">${esc(dayLabel(day.date))}${lucky}</h2><div class="card">`;
+    h += `<h2 class="day-head"><span class="day-label">${esc(dayLabel(day.date))}</span>${lucky}</h2><div class="card">`;
     for (const [lessonIdx, l] of day.lessons.entries()) {
       const tags = (l.canceled ? '<span class="tag cancel">odwołana</span>' : "") +
         (l.substitution ? '<span class="tag subst">zastępstwo</span>' : "") +
