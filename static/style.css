@@ -170,3 +170,8 @@ dialog form { text-align: right; }
   }
   :root[data-theme="magia"] h2 { color: var(--gold); }
 }
+.day-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.lucky-chip { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 600; color: var(--ink);
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
+.lucky-chip b { color: var(--brand); font-size: 15px; }
+:root[data-theme="magia"] h2.day-head::before { content: none; }

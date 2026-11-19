@@ -261,6 +261,10 @@ async def _load_today(lib: Librus) -> dict[str, Any]:
             pass
     days = sorted(d for d, lessons in week.items() if d >= today and lessons)[:3]
     agenda, cats = await asyncio.gather(lib.agenda(), lib.agenda_categories())
+    try:  # nie każda szkoła ma szczęśliwy numerek
+        lucky = await lib.lucky_number()
+    except LibrusError:
+        lucky = None
     soon = []
     for ev in agenda:
         if ev.date and today.isoformat() <= ev.date <= (today + timedelta(days=7)).isoformat():
@@ -282,6 +286,7 @@ async def _load_today(lib: Librus) -> dict[str, Any]:
         "today": today.isoformat(),
         "days": out_days,
         "soon": soon,
+        "lucky": {"number": lucky.number, "day": lucky.day} if lucky and lucky.number else None,
     }
 
 

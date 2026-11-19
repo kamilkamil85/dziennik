@@ -34,6 +34,7 @@ def today(name: str) -> dict[str, Any]:
             {"date": _d(2), "category": "Sprawdzian", "subject": "Matematyka", "content": "Ułamki dziesiętne, dział 3"},
             {"date": _d(4), "category": "Kartkówka", "subject": "Język angielski", "content": "Słówka unit 4"},
         ],
+        "lucky": {"number": 17, "day": _d(0)},
         "updated": "demo",
     }
 

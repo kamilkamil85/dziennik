@@ -134,7 +134,9 @@ function renderToday(d) {
   if (!days.length) h += `<div class="card empty">Brak lekcji w najbliższych dniach 🎉</div>`;
   todayDays = days;
   for (const [dayIdx, day] of days.entries()) {
-    h += `<h2>${esc(dayLabel(day.date))}</h2><div class="card">`;
+    const lucky = LUCKY_KIDS.includes(kid) && d.lucky && d.lucky.day === day.date
+      ? `<span class="lucky-chip" title="Szczęśliwy numerek">🍀 szczęśliwy numerek: <b>${esc(d.lucky.number)}</b></span>` : "";
+    h += `<h2 class="day-head">${esc(dayLabel(day.date))}${lucky}</h2><div class="card">`;
     for (const [lessonIdx, l] of day.lessons.entries()) {
       const tags = (l.canceled ? '<span class="tag cancel">odwołana</span>' : "") +
         (l.substitution ? '<span class="tag subst">zastępstwo</span>' : "") +
@@ -322,6 +324,8 @@ async function show(refresh = false) {
 }
 
 // Kolory każdego dziecka (po numerze z konfiguracji: 1 = Tadek, 2 = Hela, 3 = Jadzia).
+// Szczęśliwy numerek pokazujemy tylko tym dzieciom (1 = Tadek, 2 = Hela, 3 = Jadzia).
+const LUCKY_KIDS = [2, 3];
 const THEMES = { 1: "legia", 2: "fiolet", 3: "magia" };
 function applyTheme() {
   const t = THEMES[kid] || "";
