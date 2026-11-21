@@ -223,9 +223,129 @@
   "name": "św. Hilary, papież",
   "text": "Święty Hilary urodził się w 415 roku na Sardynii i był papieżem w trudnych czasach upadku Cesarstwa Rzymskiego. Jako legat odważnie bronił prawdziwej wiary na tak zwanym zbójeckim synodzie w Efezie, a jego imię oznacza człowieka wesołego i pogodnego."
  },
+ "03-01": {
+  "name": "św. Feliks III",
+  "text": "Feliks III był papieżem w Rzymie pod koniec piątego wieku, w trudnym czasie sporów o prawdziwą naukę o Jezusie. Stanowczo bronił jedności i wiary Kościoła, a co ciekawe, był prapradziadkiem świętego papieża Grzegorza Wielkiego."
+ },
  "03-02": {
   "name": "św. Agnieszka Czeska",
-  "text": "Święta Agnieszka Czeska urodziła się w 1205 roku jako córka króla Czech i jako dziecko była wychowywana w Trzebnicy przez świętą Jadwigę Śląską. Choć planowano jej małżeństwa z książętami i królami, wybrała życie zakonne, ucząc wierności własnemu powołaniu."
+  "text": "Agnieszka była czeską królewną z trzynastego wieku, która odrzuciła małżeństwo z cesarzem, by w Pradze założyć szpital i klasztor sióstr klarysek. Przyjaźniła się listownie ze świętą Klarą z Asyżu i uczy, że prawdziwa wielkość to służba ubogim i chorym."
+ },
+ "03-03": {
+  "name": "św. Katarzyna Drexel",
+  "text": "Katarzyna była bogatą dziedziczką z Filadelfii, która na przełomie dziewiętnastego i dwudziestego wieku oddała cały majątek na szkoły dla Indian i czarnoskórych Amerykanów. Założyła zgromadzenie sióstr i pierwszy katolicki uniwersytet dla czarnoskórej młodzieży, pokazując, że pieniądze mogą służyć sprawiedliwości."
+ },
+ "03-04": {
+  "name": "św. Kazimierz Królewicz",
+  "text": "Kazimierz był synem polskiego króla Kazimierza Jagiellończyka, żył w piętnastym wieku i mimo książęcego pochodzenia słynął z pokory, modlitwy i hojności dla biednych. Zmarł młodo w Grodnie, a pochowany w Wilnie jest patronem Polski, Litwy i młodzieży."
+ },
+ "03-05": {
+  "name": "św. Jan Józef od Krzyża",
+  "text": "Jan Józef był franciszkaninem z wyspy Ischia, który w siedemnastym i osiemnastym wieku żył w Neapolu i prowadził braci w ubóstwie i surowej prostocie. Mimo ważnych funkcji sam wykonywał najskromniejsze prace, ucząc, że pokora i dobroć są ważniejsze od stanowisk."
+ },
+ "03-06": {
+  "name": "św. Róża z Viterbo",
+  "text": "Róża była dziewczyną z włoskiego Viterbo, która w trzynastym wieku odważnie na ulicach zachęcała mieszkańców do wierności Kościołowi. Zmarła mając zaledwie osiemnaście lat, a jej historia pokazuje, że nawet bardzo młody człowiek może mieć odwagę mówić o tym, w co wierzy."
+ },
+ "03-07": {
+  "name": "św. Perpetua i Felicyta",
+  "text": "Perpetua była młodą matką z zamożnej rodziny, a Felicyta jej niewolnicą, i obie zginęły za wiarę w Kartaginie w Afryce w 203 roku. Perpetua spisała w więzieniu wspomnienia swoich ostatnich dni, a ich wspólna śmierć pokazuje, że wobec Boga pani i służąca są sobie równe."
+ },
+ "03-08": {
+  "name": "św. Jan Boży",
+  "text": "Jan Boży był Portugalczykiem z szesnastego wieku, który po burzliwej młodości nawrócił się i w hiszpańskiej Grenadzie zaczął opiekować się chorymi i bezdomnymi. Założył szpital i zakon bonifratrów, a dziś jest patronem chorych, pielęgniarek i szpitali."
+ },
+ "03-09": {
+  "name": "św. Dominik Savio",
+  "text": "Dominik był włoskim chłopcem z dziewiętnastego wieku, uczniem świętego Jana Bosko w Turynie, który żył zwyczajnie, ale bardzo uczciwie i radośnie. Zmarł mając niespełna piętnaście lat, a jako patron młodzieży i ministrantów przypomina, że świętość jest też dla nastolatków."
+ },
+ "03-10": {
+  "name": "40 Męczenników z Sebasty",
+  "text": "Byli to rzymscy żołnierze z czwartego wieku, którzy w Sebaście w Armenii nie chcieli wyrzec się wiary w Chrystusa. Za karę zostawiono ich na noc na zamarzniętym jeziorze, a ich wspólna wytrwałość uczy, jak bardzo wspólnota pomaga wytrwać w trudnych chwilach."
+ },
+ "03-11": {
+  "name": "św. Sofroniusz",
+  "text": "Sofroniusz był mnichem i uczonym, a potem patriarchą Jerozolimy w siódmym wieku, który bronił prawdziwej nauki o tym, że Jezus jest w pełni Bogiem i w pełni człowiekiem. Gdy Jerozolimę oblegli Arabowie, wynegocjował jej pokojowe poddanie, by oszczędzić mieszkańców, co pokazuje mądrość i troskę o ludzi."
+ },
+ "03-12": {
+  "name": "św. Alojzy Orione",
+  "text": "Alojzy był włoskim księdzem z Tortony, który na przełomie dziewiętnastego i dwudziestego wieku zakładał domy dla sierot, chorych i najbiedniejszych. Założone przez niego Małe Dzieło Boskiej Opatrzności działa także w Polsce, a on sam uczy, by ufać Bogu i nikogo nie zostawiać bez pomocy."
+ },
+ "03-13": {
+  "name": "św. Nicefor",
+  "text": "Nicefor był patriarchą Konstantynopola na początku dziewiątego wieku, w czasie gdy cesarz kazał niszczyć święte obrazy i ikony. Za obronę ikon został wygnany i resztę życia spędził w klasztorze, pokazując, że warto być wiernym prawdzie nawet za wysoką cenę."
+ },
+ "03-14": {
+  "name": "św. Matylda",
+  "text": "Matylda była niemiecką królową z dziesiątego wieku, żoną króla Henryka i matką cesarza Ottona Wielkiego. Słynęła z hojności dla ubogich i zakładania klasztorów, a w rodzinnych sporach uczyła cierpliwości i przebaczenia."
+ },
+ "03-15": {
+  "name": "św. Klemens Maria Hofbauer",
+  "text": "Klemens był redemptorystą z Moraw, który na przełomie osiemnastego i dziewiętnastego wieku przez ponad dwadzieścia lat pracował w Warszawie przy kościele świętego Benona. Prowadził tam szkołę, sierociniec i codzienne nabożeństwa, dlatego jest patronem Warszawy i Wiednia."
+ },
+ "03-16": {
+  "name": "św. Gabriel Lalemant",
+  "text": "Gabriel był francuskim jezuitą, który w siedemnastym wieku wyjechał na misje do Indian Huronów w Kanadzie. Zginął męczeńską śmiercią razem ze świętym Janem de Brébeuf w 1649 roku, a jego odwaga przypomina o oddaniu się ludziom, do których się idzie."
+ },
+ "03-17": {
+  "name": "św. Patryk",
+  "text": "Patryk żył w piątym wieku, jako chłopiec został porwany z Brytanii do Irlandii i był tam niewolnikiem, a po ucieczce wrócił na wyspę jako biskup i misjonarz. Według tradycji tłumaczył Trójcę Świętą na przykładzie listka koniczyny i jest patronem Irlandii."
+ },
+ "03-18": {
+  "name": "św. Cyryl Jerozolimski",
+  "text": "Cyryl był biskupem Jerozolimy w czwartym wieku, który kilka razy był wygnany z powodu sporów o naukę Kościoła. Zasłynął prostymi i jasnymi katechezami dla przygotowujących się do chrztu, dlatego jest doktorem Kościoła i wzorem dobrego nauczyciela wiary."
+ },
+ "03-19": {
+  "name": "św. Józef",
+  "text": "Józef był cieślą z Nazaretu i mężem Maryi, który z wielką troską opiekował się Jezusem i Jego Matką. Bez wielu słów, ale wiernie wypełniał to, czego chciał Bóg, i jest patronem ojców, rodzin, pracowników oraz całego Kościoła."
+ },
+ "03-20": {
+  "name": "św. Aleksandra",
+  "text": "Aleksandra to męczennica z pierwszych wieków chrześcijaństwa, o której życiu zachowało się niewiele pewnych wiadomości. Tradycja wspomina ją jako kobietę, która nie wyrzekła się Chrystusa w czasie prześladowań, i przypomina o wierności nawet wtedy, gdy nikt tego nie docenia."
+ },
+ "03-21": {
+  "name": "św. Benedykta od Opatrzności",
+  "text": "Benedykta Cambiagio Frassinello była Włoszką z dziewiętnastego wieku, która za zgodą męża wybrała życie zakonne i zakładała szkoły dla biednych dziewcząt. Założyła zgromadzenie Sióstr Benedyktynek od Opatrzności i uczy, że dobre wykształcenie to wielki dar dla każdego dziecka."
+ },
+ "03-22": {
+  "name": "św. Mikołaj Owen",
+  "text": "Mikołaj był angielskim jezuitą i zdolnym cieślą, który na przełomie szesnastego i siedemnastego wieku budował w domach tajne kryjówki dla prześladowanych księży. Mimo tortur nikogo nie wydał i zmarł w londyńskiej Tower w 1606 roku, a jest patronem ludzi pracujących rękami i wzorem lojalności."
+ },
+ "03-23": {
+  "name": "św. Turybiusz z Mogrovejo",
+  "text": "Turybiusz był Hiszpanem, który w szesnastym wieku został arcybiskupem Limy w Peru i przez lata odwiedzał pieszo i konno najdalsze zakątki swojej diecezji. Uczył się języków Indian i bronił ich przed krzywdą, dlatego jest patronem biskupów Ameryki Łacińskiej."
+ },
+ "03-24": {
+  "name": "św. Katarzyna Szwedzka",
+  "text": "Katarzyna była córką świętej Brygidy, żyła w czternastym wieku w Szwecji i we Włoszech i wspierała matkę w zakładaniu nowego zakonu. Po jej śmierci kierowała klasztorem w Vadstenie, a dziś jest patronką kobiet oczekujących dziecka."
+ },
+ "03-25": {
+  "name": "Zwiastowanie Pańskie",
+  "text": "Tego dnia Kościół wspomina, jak anioł Gabriel przyszedł do Maryi w Nazarecie i zapowiedział, że zostanie Matką Syna Bożego. Jej odpowiedź „Oto ja, służebnica Pańska” przypomina, że warto ufać Bogu, nawet gdy nie wszystko rozumiemy."
+ },
+ "03-26": {
+  "name": "św. Dobry Łotr",
+  "text": "Dobry Łotr, nazywany tradycyjnie Dyzmą, był przestępcą ukrzyżowanym obok Jezusa, który w ostatniej chwili życia uznał Go za Boga i poprosił o pamięć. Usłyszał wtedy obietnicę, że jeszcze dziś będzie w raju, co pokazuje, że nigdy nie jest za późno na nawrócenie."
+ },
+ "03-27": {
+  "name": "św. Rupert",
+  "text": "Rupert był biskupem około roku 700, który przybył do Bawarii i założył miasto Salzburg, budując tam kościół i klasztor. Rozwinął w okolicy wydobycie soli, dzięki której region się bogacił, i jest patronem Salzburga oraz górników soli."
+ },
+ "03-28": {
+  "name": "św. Guntram",
+  "text": "Guntram był frankońskim królem Burgundii w szóstym wieku, który mimo burzliwej młodości stał się władcą troskliwym i sprawiedliwym. Pokutował za dawne błędy, fundował kościoły i pomagał ubogim w czasie zarazy, ucząc, że każdy może zmienić swoje życie na lepsze."
+ },
+ "03-29": {
+  "name": "św. Stefan IX",
+  "text": "Stefan IX był papieżem w połowie jedenastego wieku, a wcześniej opatem słynnego klasztoru na Monte Cassino. Choć rządził Kościołem tylko kilka miesięcy, wspierał jego odnowę i walczył z kupowaniem urzędów, pokazując, że uczciwość jest ważniejsza od władzy."
+ },
+ "03-30": {
+  "name": "św. Leonard Murialdo",
+  "text": "Leonard był księdzem z Turynu, który w dziewiętnastym wieku poświęcił się biednej i pracującej młodzieży, prowadząc dla niej szkoły i warsztaty. Założył zgromadzenie józefitów, które działa także w Polsce, i uczy, że każdy młody człowiek zasługuje na szansę."
+ },
+ "03-31": {
+  "name": "św. Balbina",
+  "text": "Balbina była młodą Rzymianką z drugiego wieku, córką trybuna, który według tradycji sam nawrócił się na chrześcijaństwo. Zginęła męczeńską śmiercią za wiarę, a w Rzymie do dziś stoi kościół nazwany jej imieniem."
  },
  "04-01": {
   "name": "św. Maria Egipcjanka",
