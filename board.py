@@ -105,6 +105,69 @@ def commute(now: datetime) -> dict[str, Any] | None:
         return None
 
 
+def calendars(now: datetime) -> list[dict[str, Any]]:
+    """Wydarzenia z kalendarzy Google (tajne adresy iCal) na dziś i 6 kolejnych dni.
+
+    KALENDARZE: jeden kalendarz na linię, "Nazwa|#kolor|https://...ics".
+    """
+    raw = os.environ.get("KALENDARZE", "").strip()
+    if not raw:
+        return []
+    import icalendar
+    import recurring_ical_events
+    from datetime import date as _date, timedelta
+    from zoneinfo import ZoneInfo
+
+    tz = ZoneInfo("Europe/Warsaw")
+    start = now.date()
+    end = start + timedelta(days=7)
+    out: list[dict[str, Any]] = []
+    for line in raw.splitlines():
+        parts = [p.strip() for p in line.split("|")]
+        if len(parts) != 3 or not parts[2].startswith("http"):
+            continue
+        name, color, url = parts
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                cal = icalendar.Calendar.from_ical(r.read())
+            for ev in recurring_ical_events.of(cal).between(start, end):
+                s, e = ev.get("DTSTART").dt, ev.get("DTEND").dt if ev.get("DTEND") else None
+                all_day = isinstance(s, _date) and not isinstance(s, datetime)
+                if not all_day:
+                    s = s.astimezone(tz) if s.tzinfo else s.replace(tzinfo=tz)
+                    e = (e.astimezone(tz) if e.tzinfo else e.replace(tzinfo=tz)) if e else None
+                first = s if all_day else s.date()
+                last = (e - timedelta(days=1)) if (all_day and e) else (e.date() if e else first)
+                d = max(first, start)
+                while d <= min(last, end - timedelta(days=1)):  # wielodniowe wydarzenia na każdy dzień
+                    out.append({
+                        "date": d.isoformat(), "cal": name, "color": color,
+                        "title": str(ev.get("SUMMARY", "")).strip() or "(bez tytułu)",
+                        "allDay": all_day,
+                        "from": None if all_day else s.strftime("%H:%M"),
+                        "to": None if all_day or not e else e.strftime("%H:%M"),
+                    })
+                    d += timedelta(days=1)
+        except Exception as err:
+            print(f"::warning::Kalendarz {name}: nie udało się pobrać ({type(err).__name__})")
+    out.sort(key=lambda x: (x["date"], not x["allDay"], x["from"] or ""))
+    return out
+
+
+def _demo_events(now: datetime) -> list[dict[str, Any]]:
+    if os.environ.get("DEMO") != "1":
+        return []
+    from datetime import timedelta
+    d = lambda n: (now.date() + timedelta(days=n)).isoformat()
+    return [
+        {"date": d(0), "cal": "Rodzina", "color": "#3a7bd5", "title": "Dentysta Hela", "allDay": False, "from": "16:00", "to": "16:30"},
+        {"date": d(1), "cal": "Kamil", "color": "#e67e22", "title": "Wyjazd służbowy", "allDay": True, "from": None, "to": None},
+        {"date": d(2), "cal": "Rodzina", "color": "#3a7bd5", "title": "Urodziny babci", "allDay": True, "from": None, "to": None},
+        {"date": d(4), "cal": "Rodzina", "color": "#3a7bd5", "title": "Zebranie w szkole", "allDay": False, "from": "17:30", "to": "18:30"},
+    ]
+
+
 def build(everything: dict[str, dict], children: dict, now: datetime) -> dict[str, Any]:
     kids = []
     for n, child in children.items():
@@ -115,6 +178,7 @@ def build(everything: dict[str, dict], children: dict, now: datetime) -> dict[st
         "generated": now.strftime("%Y-%m-%d %H:%M"),
         "kids": kids,
         "activities": activities(),
+        "events": calendars(now) or _demo_events(now),
         "smog": smog(),
         "commute": commute(now),
         "place": {"name": "Karczew", "lat": 52.0874, "lon": 21.2492, "teryt": os.environ.get("TERYT_POWIAT", "1417")},

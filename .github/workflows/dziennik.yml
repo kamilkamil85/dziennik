@@ -72,6 +72,7 @@ jobs:
           # Tablica na lodówce
           TABLICA_HASLO: ${{ secrets.TABLICA_HASLO }}
           ZAJECIA: ${{ vars.ZAJECIA }}
+          KALENDARZE: ${{ secrets.KALENDARZE }}
           TOMTOM_KEY: ${{ secrets.TOMTOM_KEY }}
           # Do kiedy ważny jest token GitHuba w cron-job.org (RRRR-MM-DD). Po odnowieniu ustaw zmienną TOKEN_WAZNY_DO.
           TOKEN_WAZNY_DO: ${{ vars.TOKEN_WAZNY_DO || '2027-02-09' }}

@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-21T20:13:45.296Z",
+        "reason": "Claude: tablica informacyjna oglądana z daleka, użytkownik prosił o czytelny i minimalistyczny wygląd; Inter wybrany celowo dla czytelności cyfr (tabular-nums)"
+      }
+    ]
+  }
+}

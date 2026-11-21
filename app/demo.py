@@ -29,7 +29,9 @@ def today(name: str) -> dict[str, Any]:
             lessons[-1]["events"] = [{"label": "kartkówka", "kind": "quiz", "category": "Kartkówka", "content": "Lektura: rozdziały 1-4"}]
     return {
         "student": name, "today": _d(0),
-        "days": [{"date": _d(0), "lessons": lessons}, {"date": _d(1), "lessons": [dict(l, canceled=False, substitution=False, original=None) for l in lessons[:4]]}],
+        "days": [{"date": _d(0), "lessons": lessons}] + [
+            {"date": _d(i), "lessons": [dict(l, canceled=False, substitution=False, original=None, events=None) for l in lessons[: 3 + i % 3]]}
+            for i in range(1, 7) if (date.today() + timedelta(days=i)).weekday() < 5],
         "soon": [
             {"date": _d(2), "category": "Sprawdzian", "subject": "Matematyka", "content": "Ułamki dziesiętne, dział 3", "kind": "test"},
             {"date": _d(4), "category": "Kartkówka", "subject": "Język angielski", "content": "Słówka unit 4", "kind": "quiz"},

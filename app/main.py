@@ -253,13 +253,13 @@ async def _load_today(lib: Librus) -> dict[str, Any]:
     today = _today()
     subjects, teachers, rooms = await asyncio.gather(lib.subjects(), lib.teachers(), lib.classrooms())
     week = await lib.timetable()
-    # Trzy najbliższe dni z lekcjami: gdy dane się nie odświeżą, rano nadal widać dzisiejszy plan.
-    if len([d for d, lessons in week.items() if d >= today and lessons]) < 3:
-        try:
-            week = {**week, **await lib.timetable(week_of=today + timedelta(days=7))}
-        except LibrusError:
-            pass
-    days = sorted(d for d, lessons in week.items() if d >= today and lessons)[:3]
+    # Plan na 7 dni (tablica pokazuje dziś i 6 kolejnych), więc zawsze dobieramy też następny tydzień.
+    # Dzięki zapasowi rano widać dzisiejszy plan nawet wtedy, gdy dane się nie odświeżą.
+    try:
+        week = {**week, **await lib.timetable(week_of=today + timedelta(days=7))}
+    except LibrusError:
+        pass
+    days = sorted(d for d, lessons in week.items() if today <= d <= today + timedelta(days=6) and lessons)
     agenda, cats = await asyncio.gather(lib.agenda(), lib.agenda_categories())
     try:  # nie każda szkoła ma szczęśliwy numerek
         lucky = await lib.lucky_number()
