@@ -158,6 +158,12 @@ async def main() -> None:
             raise SystemExit("RODZIC_HASLO_APP: min. 10 znaków.")
         # Plik rodzica: dane wszystkich dzieci zaszyfrowane jednym hasłem.
         (SITE / "data" / "0.json").write_text(json.dumps(encrypt({"kids": everything, "generated": stamp}, parent_pw, 0)), encoding="utf-8")
+    # Tablica na lodówce: osobny, okrojony plik z własnym hasłem.
+    board_pw = "demo" if DEMO else os.environ.get("TABLICA_HASLO", "")
+    if board_pw:
+        import board
+        b = board.build(everything, m.CHILDREN, datetime.now(m.TZ))
+        (SITE / "data" / "board.json").write_text(json.dumps(encrypt(b, board_pw, 99)), encoding="utf-8")
     pack_sessions()
     (SITE / "data" / "kids.json").write_text(json.dumps({"kids": kids, "parent": bool(parent_pw), "generated": stamp,
                     "token_until": os.environ.get("TOKEN_WAZNY_DO", "")}, ensure_ascii=False), encoding="utf-8")

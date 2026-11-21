@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tablica</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root { --bg: #f6f5f1; --card: #ffffff; --ink: #1b1d1c; --muted: #6d716e; --line: #e6e4de;
+  --good: #2e8b57; --mid: #c98a12; --bad: #c0392b; --legia: #0b7a3e; --fiolet: #8e6cc7; --magia: #7a1420; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
+body { padding: 28px 36px; display: grid; grid-template-rows: auto 1fr auto; gap: 22px; overflow: hidden; }
+.top { display: flex; justify-content: space-between; align-items: flex-end; }
+.clock { font-size: 112px; font-weight: 600; line-height: .9; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.date { font-size: 26px; color: var(--muted); margin-top: 10px; }
+.weather { text-align: right; }
+.wnow { font-size: 64px; font-weight: 600; line-height: 1; }
+.wnow .ico { font-size: 52px; margin-right: 10px; }
+.wdesc { font-size: 22px; color: var(--muted); margin-top: 8px; }
+.warn { margin-top: 10px; display: inline-block; background: #fde9d9; color: #8a3a0a; font-size: 18px; font-weight: 600; padding: 6px 12px; border-radius: 10px; }
+.kids { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.kid { background: var(--card); border-radius: 20px; padding: 22px 24px; border-top: 8px solid var(--c); display: flex; flex-direction: column; gap: 10px; }
+.kid h2 { margin: 0; font-size: 30px; color: var(--c); }
+.when { font-size: 16px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.school { font-size: 50px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.school.off { font-size: 30px; color: var(--muted); font-weight: 600; }
+.note { font-size: 19px; color: var(--bad); font-weight: 600; }
+.act { font-size: 21px; display: flex; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 9px; }
+.act b { font-weight: 600; }
+.act span { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.bottom { display: flex; gap: 18px; }
+.pill { background: var(--card); border-radius: 16px; padding: 14px 20px; font-size: 22px; display: flex; align-items: center; gap: 12px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--muted); flex: none; }
+.small { font-size: 15px; color: var(--muted); }
+.stamp { margin-left: auto; align-self: center; font-size: 14px; color: var(--muted); }
+/* noc */
+body.night { --bg: #050505; --ink: #8b8b86; --muted: #55554f; grid-template-rows: 1fr; place-items: center; }
+body.night .kids, body.night .bottom, body.night .warn { display: none; }
+body.night .top { flex-direction: column; align-items: center; gap: 30px; }
+body.night .clock { font-size: 200px; font-weight: 500; }
+body.night .date { text-align: center; }
+body.night .weather { text-align: center; }
+body.night .ico { opacity: .45; filter: grayscale(1); }
+/* hasło */
+.lock { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; font-size: 22px; }
+.lock input { font-size: 24px; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--line); width: 360px; }
+.lock button { font-size: 22px; padding: 12px 28px; border-radius: 12px; border: 0; background: var(--ink); color: #fff; }
+</style>
+</head>
+<body>
+<section class="top">
+  <div><div class="clock" id="clock">--:--</div><div class="date" id="date"></div></div>
+  <div class="weather"><div class="wnow" id="wnow"></div><div class="wdesc" id="wdesc"></div><div id="warns"></div></div>
+</section>
+<section class="kids" id="kids"></section>
+<section class="bottom" id="bottom"></section>
+
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const DAYS = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"];
+const MONTHS = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
+const COLORS = { legia: "var(--legia)", fiolet: "var(--fiolet)", magia: "var(--magia)" };
+const PLACE = { lat: 52.0874, lon: 21.2492, teryt: "1417" };
+const TOMORROW_FROM = 17, NIGHT_FROM = 22, NIGHT_TO = 6;
+let board = null, weather = null, warns = [], imgw = null;
+// ?czas=RRRR-MM-DDTHH:MM symuluje inną godzinę (do testów wyglądu).
+const FAKE = new URLSearchParams(location.search).get("czas"), T0 = Date.now();
+const clock = () => FAKE ? new Date(new Date(FAKE).getTime() + (Date.now() - T0)) : new Date();
+
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } }
+const b64d = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const b64e = (u) => btoa(String.fromCharCode(...new Uint8Array(u)));
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+async function fetchBox() {
+  const r = await fetch(`../data/board.json?t=${Date.now()}`, { cache: "no-store" });
+  if (!r.ok) throw new Error("brak danych");
+  return r.json();
+}
+async function decrypt(raw, box) {
+  const key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64d(box.iv) }, key, b64d(box.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+async function derive(pw, box) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+  return crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: b64d(box.salt), iterations: box.iter }, base, 256);
+}
+
+function askPassword() {
+  const d = document.createElement("div");
+  d.className = "lock";
+  d.innerHTML = `<div>Hasło tablicy</div><input type="password" id="pw" autocomplete="current-password"><button id="go">Otwórz</button><div id="err" class="small"></div>`;
+  document.body.appendChild(d);
+  const go = async () => {
+    try {
+      const box = await fetchBox(), raw = await derive($("#pw").value, box);
+      board = await decrypt(raw, box);
+      store("boardKey", b64e(raw)); d.remove(); render();
+    } catch { $("#err").textContent = "Złe hasło albo brak danych."; }
+  };
+  $("#go").onclick = go; $("#pw").onkeydown = (e) => e.key === "Enter" && go();
+}
+
+async function loadBoard() {
+  const raw = store("boardKey");
+  if (!raw) return askPassword();
+  try { board = await decrypt(b64d(raw), await fetchBox()); render(); }
+  catch (e) { if (String(e).includes("OperationError")) { localStorage.removeItem("boardKey"); askPassword(); } }
+}
+
+// ---------- pogoda ----------
+const WMO = { 0: ["☀️", "bezchmurnie"], 1: ["🌤️", "przeważnie pogodnie"], 2: ["⛅", "częściowe zachmurzenie"], 3: ["☁️", "pochmurno"],
+  45: ["🌫️", "mgła"], 48: ["🌫️", "szadź"], 51: ["🌦️", "mżawka"], 53: ["🌦️", "mżawka"], 55: ["🌧️", "gęsta mżawka"],
+  56: ["🌧️", "marznąca mżawka"], 57: ["🌧️", "marznąca mżawka"], 61: ["🌧️", "słaby deszcz"], 63: ["🌧️", "deszcz"], 65: ["🌧️", "ulewa"],
+  66: ["🌧️", "marznący deszcz"], 67: ["🌧️", "marznący deszcz"], 71: ["🌨️", "słaby śnieg"], 73: ["🌨️", "śnieg"], 75: ["❄️", "intensywny śnieg"],
+  77: ["🌨️", "ziarna śniegu"], 80: ["🌦️", "przelotny deszcz"], 81: ["🌧️", "przelotny deszcz"], 82: ["⛈️", "ulewa"],
+  85: ["🌨️", "przelotny śnieg"], 86: ["❄️", "przelotny śnieg"], 95: ["⛈️", "burza"], 96: ["⛈️", "burza z gradem"], 99: ["⛈️", "burza z gradem"] };
+
+async function loadWeather() {
+  try {
+    const u = `https://api.open-meteo.com/v1/forecast?latitude=${PLACE.lat}&longitude=${PLACE.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=Europe%2FWarsaw&forecast_days=2`;
+    weather = await (await fetch(u)).json();
+  } catch {}
+  try { imgw = await (await fetch("https://danepubliczne.imgw.pl/api/data/synop/station/warszawa")).json(); } catch {}
+  renderWeather();
+}
+async function loadWarnings() {
+  try {
+    const list = await (await fetch("https://danepubliczne.imgw.pl/api/data/warningsmeteo")).json();
+    const now = new Date();
+    warns = list.filter((w) => (w.teryt || []).includes(PLACE.teryt) && new Date(w.obowiazuje_do.replace(" ", "T")) > now);
+  } catch { warns = []; }
+  renderWeather();
+}
+function renderWeather() {
+  if (!weather?.daily) return;
+  const tmr = clock().getHours() >= TOMORROW_FROM, i = tmr ? 1 : 0, d = weather.daily;
+  const now = imgw?.temperatura != null ? Math.round(parseFloat(imgw.temperatura)) : Math.round(weather.current.temperature_2m);
+  const [ico] = WMO[weather.current.weather_code] || ["", ""];
+  const [, txt] = WMO[d.weather_code[i]] || ["", ""];
+  $("#wnow").innerHTML = `<span class="ico">${ico}</span>${now}°`;
+  $("#wdesc").textContent = `${tmr ? "jutro" : "dziś"} ${Math.round(d.temperature_2m_min[i])}° / ${Math.round(d.temperature_2m_max[i])}° · ${txt}` +
+    (d.precipitation_probability_max[i] >= 40 ? ` · opady ${d.precipitation_probability_max[i]}%` : "");
+  $("#warns").innerHTML = warns.slice(0, 2).map((w) => `<div class="warn">⚠ ${esc(w.nazwa_zdarzenia)} (st. ${esc(w.stopien)}) do ${esc(w.obowiazuje_do.slice(11, 16))}${w.obowiazuje_do.slice(0, 10) !== iso(clock()) ? " jutro" : ""}</div>`).join("");
+}
+
+// ---------- tablica ----------
+function activitiesFor(name, date) {
+  const dow = (date.getDay() + 6) % 7, day = iso(date);
+  return (board.activities || []).filter((a) => a.kto === name && !(a.bez || []).includes(day) && (a.data ? a.data === day : a.dni.includes(dow)))
+    .sort((a, b) => a.od.localeCompare(b.od, undefined, { numeric: true }));
+}
+function render() {
+  if (!board) return;
+  const now = clock(), tmr = now.getHours() >= TOMORROW_FROM;
+  const target = new Date(now); if (tmr) target.setDate(target.getDate() + 1);
+  const t = iso(target), label = tmr ? `jutro · ${DAYS[target.getDay()]}` : "dziś";
+  $("#kids").innerHTML = board.kids.map((k) => {
+    const day = (k.days || []).find((x) => x.date === t);
+    const weekend = target.getDay() === 0 || target.getDay() === 6;
+    const school = day && day.start ? `<div class="school">${esc(day.start)} – ${esc(day.end)}</div>`
+      : `<div class="school off">${weekend ? "weekend" : day ? "bez lekcji" : "brak planu"}</div>`;
+    const notes = (day?.notes || []).map((n) => `<div class="note">${esc(n)}</div>`).join("");
+    const acts = activitiesFor(k.name, target).map((a) => `<div class="act"><b>${esc(a.co)}</b><span>${esc(a.od)}${a.do ? " – " + esc(a.do) : ""}</span></div>`).join("");
+    return `<div class="kid" style="--c:${COLORS[k.theme] || "var(--ink)"}"><h2>${esc(k.name)}</h2><div class="when">${label}</div>${school}${notes}${acts}</div>`;
+  }).join("");
+  const parts = [];
+  const c = board.commute, h = now.getHours() + now.getMinutes() / 60;
+  if (c && h >= 6.75 && h <= 9.25) {
+    const color = c.delay >= 10 ? "var(--bad)" : c.delay >= 5 ? "var(--mid)" : "var(--good)";
+    parts.push(`<div class="pill"><span class="dot" style="background:${color}"></span>🚗 Do pracy: <b>${c.minutes} min</b>${c.delay > 0 ? ` <span class="small">(+${c.delay} korki, zwykle ${c.normal})</span>` : ""} <span class="small">· ${esc(c.at)}</span></div>`);
+  }
+  const s = board.smog;
+  if (s && s.index) {
+    const L = { 1: ["bardzo dobre", "var(--good)"], 2: ["dobre", "var(--good)"], 3: ["umiarkowane", "var(--mid)"], 4: ["dostateczne", "var(--mid)"], 5: ["złe", "var(--bad)"], 6: ["bardzo złe", "var(--bad)"] }[s.index] || ["?", "var(--muted)"];
+    parts.push(`<div class="pill"><span class="dot" style="background:${L[1]}"></span>Powietrze: <b>${L[0]}</b> <span class="small">PM2,5 ${esc(s.pm25)} · PM10 ${esc(s.pm10)}</span></div>`);
+  }
+  parts.push(`<div class="stamp">dane z ${esc(board.generated.slice(11))}</div>`);
+  $("#bottom").innerHTML = parts.join("");
+}
+
+function tick() {
+  const now = clock(), hh = now.getHours();
+  $("#clock").textContent = `${hh}:${String(now.getMinutes()).padStart(2, "0")}`;
+  $("#date").textContent = `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
+  document.body.classList.toggle("night", hh >= NIGHT_FROM || hh < NIGHT_TO);
+  if (now.getSeconds() === 0) { render(); renderWeather(); }
+  if (hh === 3 && now.getMinutes() === 0 && now.getSeconds() === 0) location.reload(); // nowa wersja strony raz na dobę
+}
+
+tick(); setInterval(tick, 1000);
+loadBoard(); setInterval(loadBoard, 5 * 60e3);
+loadWeather(); setInterval(loadWeather, 15 * 60e3);
+loadWarnings(); setInterval(loadWarnings, 30 * 60e3);
+</script>
+</body>
+</html>
