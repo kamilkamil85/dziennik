@@ -241,7 +241,7 @@ function renderPatron() {
   const p = board?.patron;
   // patron jest liczony przy przebiegu; po północy, zanim przyjdą nowe dane, nie pokazujemy wczorajszego
   const fresh = board && board.generated.slice(0, 10) === iso(clock());
-  $("#patron").innerHTML = p && fresh ? `<b>Patron dnia: ${esc(p.name)}.</b> ${esc(p.text)}` : "";
+  $("#patron").innerHTML = !fresh ? "" : p ? `<b>Patron dnia: ${esc(p.name)}.</b> ${esc(p.text)}` : `<b>Patron dnia:</b> nie pobrano danych na ten dzień.`;
 }
 function render() {
   renderPatron(); renderWeek(); renderCommute(); renderWx();
