@@ -168,6 +168,16 @@ def _demo_events(now: datetime) -> list[dict[str, Any]]:
     ]
 
 
+def patron(now: datetime) -> dict[str, Any] | None:
+    """Patron dnia z pliku patroni.json w repo (dwuzdaniowe notki na każdy dzień)."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "patroni.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f).get(now.strftime("%m-%d"))
+    except (OSError, ValueError):
+        return None
+
+
 def build(everything: dict[str, dict], children: dict, now: datetime) -> dict[str, Any]:
     kids = []
     for n, child in children.items():
@@ -179,6 +189,7 @@ def build(everything: dict[str, dict], children: dict, now: datetime) -> dict[st
         "kids": kids,
         "activities": activities(),
         "events": calendars(now) or _demo_events(now),
+        "patron": patron(now),
         "smog": smog(),
         "commute": commute(now),
         "place": {"name": "Karczew", "lat": 52.0874, "lon": 21.2492, "teryt": os.environ.get("TERYT_POWIAT", "1417")},

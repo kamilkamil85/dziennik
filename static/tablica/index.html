@@ -11,7 +11,10 @@
   --good: #2e8b57; --mid: #c98a12; --bad: #c0392b; --today: #1b1d1c; }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
-body { padding: 20px 24px; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 16px; overflow: hidden; }
+body { padding: 20px 24px; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 14px; overflow: hidden; }
+.patron { font-size: 16px; line-height: 1.4; color: var(--muted); padding: 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.patron b { color: var(--ink); font-weight: 600; }
+.patron:empty { display: none; }
 
 /* góra: zegar + blok pogoda/powietrze */
 .top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: stretch; }
@@ -65,7 +68,7 @@ body { padding: 20px 24px; display: grid; grid-template-rows: auto minmax(0, 1fr
 
 /* noc */
 body.night { --bg: #050505; --ink: #8b8b86; --muted: #55554f; grid-template-rows: 1fr; place-items: center; }
-body.night .week, body.night .warn, body.night .air, body.night .commute, body.night .stamp, body.night .fd { display: none; }
+body.night .week, body.night .patron, body.night .warn, body.night .air, body.night .commute, body.night .stamp, body.night .fd { display: none; }
 body.night .top { grid-template-columns: 1fr; justify-items: center; gap: 30px; }
 body.night .time { align-items: center; }
 body.night .clock { font-size: 190px; font-weight: 500; }
@@ -83,6 +86,7 @@ body.night .ico { opacity: .45; filter: grayscale(1); }
   <div class="time"><div class="clock" id="clock">--:--</div><div class="date" id="date"></div><div class="commute" id="commute"></div></div>
   <div class="wx" id="wx"></div>
 </section>
+<section class="patron" id="patron"></section>
 <section class="week" id="week"></section>
 <div class="stamp" id="stamp"></div>
 
@@ -233,8 +237,14 @@ function renderCommute() {
   const col = c.delay >= 10 ? "var(--bad)" : c.delay >= 5 ? "var(--mid)" : "var(--good)";
   $("#commute").innerHTML = `<span class="dot" style="background:${col}"></span>🚗 do pracy <b>${c.minutes} min</b>${c.delay > 0 ? ` <span class="small">(+${c.delay} korki)</span>` : ""} <span class="small">· ${esc(c.at)}</span>`;
 }
+function renderPatron() {
+  const p = board?.patron;
+  // patron jest liczony przy przebiegu; po północy, zanim przyjdą nowe dane, nie pokazujemy wczorajszego
+  const fresh = board && board.generated.slice(0, 10) === iso(clock());
+  $("#patron").innerHTML = p && fresh ? `<b>Patron dnia: ${esc(p.name)}.</b> ${esc(p.text)}` : "";
+}
 function render() {
-  renderWeek(); renderCommute(); renderWx();
+  renderPatron(); renderWeek(); renderCommute(); renderWx();
   if (board) $("#stamp").textContent = `dane z ${board.generated.slice(11)}`;
 }
 
