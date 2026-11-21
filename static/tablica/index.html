@@ -15,6 +15,8 @@ body { padding: 20px 24px; display: grid; grid-template-rows: auto auto minmax(0
 .patron { font-size: 16px; line-height: 1.4; color: var(--muted); padding: 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .patron b { color: var(--ink); font-weight: 600; }
 .patron:empty { display: none; }
+.patron .cov, .cov-tag { color: #1f4e8c; }
+.cov-tag { font-size: 13px; font-weight: 700; background: #e6eef9; border-radius: 6px; padding: 3px 6px; }
 
 /* góra: zegar + blok pogoda/powietrze */
 .top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: stretch; }
@@ -226,6 +228,7 @@ function renderWeek() {
     const evs = (board.events || []).filter((e) => e.date === d);
     if (evs.length && body) body += `<div class="sep"></div>`;
     body += evs.map((e) => `<div class="ev" style="--c:${esc(e.color || "#888")}">${e.allDay ? "" : `<span class="h">${esc(e.from)}${e.to && i === 0 ? "–" + esc(e.to) : ""}</span> `}${esc(e.title)}</div>`).join("");
+    if (date.getDate() === 18 && i > 0) body = `<div class="cov-tag">Dzień Przymierza</div>` + body;
     if (!body) body = `<div class="small">${weekend ? "weekend" : "—"}</div>`;
     h += `<div class="${cls}"><div class="dh"><b>${title}</b><span>${i === 1 ? DSHORT[date.getDay()] + " " : ""}${date.getDate()}.${String(date.getMonth() + 1).padStart(2, "0")}</span></div>${body}</div>`;
   }
@@ -241,7 +244,8 @@ function renderPatron() {
   const p = board?.patron;
   // patron jest liczony przy przebiegu; po północy, zanim przyjdą nowe dane, nie pokazujemy wczorajszego
   const fresh = board && board.generated.slice(0, 10) === iso(clock());
-  $("#patron").innerHTML = !fresh ? "" : p ? `<b>Patron dnia: ${esc(p.name)}.</b> ${esc(p.text)}` : `<b>Patron dnia:</b> nie pobrano danych na ten dzień.`;
+  const covenant = clock().getDate() === 18 ? `<b class="cov">Dziś Dzień Przymierza.</b> ` : "";
+  $("#patron").innerHTML = covenant + (!fresh ? "" : p ? `<b>Patron dnia: ${esc(p.name)}.</b> ${esc(p.text)}` : `<b>Patron dnia:</b> nie pobrano danych na ten dzień.`);
 }
 function render() {
   renderPatron(); renderWeek(); renderCommute(); renderWx();
