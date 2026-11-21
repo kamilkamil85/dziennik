@@ -211,8 +211,52 @@ function subjectSheet(i) {
   openSheet(h);
 }
 
+// ---------- kalendarz w terminarzu ----------
+let agendaData = null;
+let calMonth = null; // "RRRR-MM"
+let calDay = null;   // "RRRR-MM-DD"
+const MONTHS = ["styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec", "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień"];
+const isoOf = (dt) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+function agendaMode() { return store(`agendaView${kid}`) || (kid === 2 ? "cal" : "list"); }
+
+function renderCalendar(d) {
+  const today = isoOf(new Date());
+  if (!calMonth) calMonth = today.slice(0, 7);
+  const [y, m] = calMonth.split("-").map(Number);
+  const first = new Date(y, m - 1, 1), days = new Date(y, m, 0).getDate();
+  const offset = (first.getDay() + 6) % 7; // poniedziałek = 0
+  const byDay = {};
+  for (const e of d.events) (byDay[e.date] ||= []).push(e);
+  for (const w of d.homework) { const k = w.due || w.date; if (k) (byDay[k] ||= []).push({ ...w, kind: "hw", hw: true }); }
+  let h = `<div class="card cal"><div class="cal-head">
+    <button class="icon-btn" data-cal="-1" aria-label="Poprzedni miesiąc">‹</button>
+    <b>${MONTHS[m - 1]} ${y}</b>
+    <button class="icon-btn" data-cal="1" aria-label="Następny miesiąc">›</button></div>
+    <div class="cal-grid">${["pn", "wt", "śr", "cz", "pt", "sb", "nd"].map((x) => `<span class="cal-dow">${x}</span>`).join("")}`;
+  for (let i = 0; i < offset; i++) h += `<span></span>`;
+  for (let n = 1; n <= days; n++) {
+    const iso = `${calMonth}-${String(n).padStart(2, "0")}`, evs = byDay[iso] || [];
+    const kinds = [...new Set(evs.map((e) => e.kind))].sort();
+    h += `<button class="cal-day${iso === today ? " today" : ""}${iso === calDay ? " sel" : ""}${evs.length ? " has" : ""}" data-day="${iso}">
+      <span>${n}</span><span class="dots">${kinds.map((k) => `<i class="dot ${k}"></i>`).join("")}</span></button>`;
+  }
+  h += `</div><div class="cal-legend small muted"><i class="dot test"></i>sprawdzian <i class="dot quiz"></i>kartkówka <i class="dot hw"></i>zadanie <i class="dot info"></i>inne</div></div>`;
+  const sel = calDay && byDay[calDay];
+  if (calDay) {
+    h += `<h2>${esc(dayLabel(calDay))}</h2>`;
+    h += sel ? sel.map((e) => e.hw
+      ? `<div class="card event">${dateBox(calDay)}<div><div class="cat">zadanie domowe</div><b>${esc(e.topic)}</b><div class="small content">${esc(e.text)}</div></div></div>`
+      : eventCard(e)).join("") : `<div class="card empty">Tego dnia nic nie ma.</div>`;
+  }
+  return h;
+}
+
 function renderAgenda(d) {
-  let h = `<h2>Sprawdziany i wydarzenia</h2>`;
+  agendaData = d;
+  const mode = agendaMode();
+  let h = `<div class="seg"><button data-mode="cal" class="${mode === "cal" ? "on" : ""}">Kalendarz</button><button data-mode="list" class="${mode === "list" ? "on" : ""}">Lista</button></div>`;
+  if (mode === "cal") return h + renderCalendar(d) + footer(d);
+  h += `<h2>Sprawdziany i wydarzenia</h2>`;
   h += d.events.length ? d.events.map(eventCard).join("") : `<div class="card empty">Nic zaplanowanego.</div>`;
   h += `<h2>Zadania domowe</h2>`;
   if (!d.homework.length) h += `<div class="card empty">Brak zadań.</div>`;
@@ -350,6 +394,15 @@ document.querySelector(".tabs").onclick = (e) => {
 };
 $("#refresh").onclick = () => show(true);
 view.onclick = (e) => {
+  const seg = e.target.closest(".seg button[data-mode]");
+  if (seg) { store(`agendaView${kid}`, seg.dataset.mode); view.innerHTML = renderAgenda(agendaData); return; }
+  const nav = e.target.closest("[data-cal]");
+  if (nav) {
+    const [y, m] = calMonth.split("-").map(Number), dt = new Date(y, m - 1 + Number(nav.dataset.cal), 1);
+    calMonth = isoOf(dt).slice(0, 7); view.innerHTML = renderAgenda(agendaData); return;
+  }
+  const cd = e.target.closest(".cal-day");
+  if (cd) { calDay = cd.dataset.day === calDay ? null : cd.dataset.day; view.innerHTML = renderAgenda(agendaData); return; }
   const ev = e.target.closest(".lesson[data-ev]");
   if (ev) {
     const [di, li] = ev.dataset.ev.split(":").map(Number), l = todayDays[di].lessons[li];

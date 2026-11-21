@@ -173,15 +173,12 @@ dialog form { text-align: right; }
 :root[data-theme="fiolet"] .subj, :root[data-theme="fiolet"] .tabs button,
 :root[data-theme="fiolet"] .cat { text-transform: lowercase; }
 :root[data-theme="fiolet"] h2 { text-transform: lowercase; letter-spacing: .08em; color: #9a7fc7; }
-:root[data-theme="fiolet"] h2:not(.day-head)::before, :root[data-theme="fiolet"] .day-label::before { content: "⋆˚ "; }
 :root[data-theme="fiolet"] .card { border: 1px solid var(--line); box-shadow: none; }
 :root[data-theme="fiolet"] .lesson { border-top: 1px dashed var(--line); }
 :root[data-theme="fiolet"] .lesson .no { width: 28px; height: 28px; border-radius: 50%; background: var(--soft); color: var(--brand);
   display: flex; align-items: center; justify-content: center; font-size: 13px; justify-self: center; }
 :root[data-theme="fiolet"] .kid.on { background: var(--bar); }
 :root[data-theme="fiolet"] .kid.on::after { content: " ♡"; }
-:root[data-theme="fiolet"] .meta::before { content: "✧ "; }
-:root[data-theme="fiolet"] .meta::after { content: " ✧"; }
 :root[data-theme="fiolet"] .tag { border-radius: 999px; }
 :root[data-theme="fiolet"] .date-box { background: var(--soft); color: var(--brand); border-radius: 16px; }
 
@@ -230,3 +227,23 @@ dialog form { text-align: right; }
   :root[data-theme="legia"] .tabs { border-top-color: #f4f4f1; }
 }
 :root[data-theme="legia"] .lucky-chip { border-radius: 0; border: 2px solid var(--line); }
+
+/* ---------- kalendarz ---------- */
+.seg { display: flex; background: var(--chip); border-radius: 999px; padding: 3px; margin: 8px 0 12px; }
+.seg button { flex: 1; border: 0; background: none; padding: 7px 0; border-radius: 999px; font-weight: 600; color: var(--muted); }
+.seg button.on { background: var(--card); color: var(--brand); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; text-transform: capitalize; }
+.cal-head .icon-btn { font-size: 22px; line-height: 1; width: 36px; height: 36px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal-dow { text-align: center; font-size: 11px; color: var(--muted); text-transform: uppercase; padding-bottom: 4px; }
+.cal-day { border: 0; background: none; border-radius: 12px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 15px; color: var(--ink); padding: 0; }
+.cal-day.has { background: var(--chip); font-weight: 700; }
+.cal-day.today { outline: 2px solid var(--brand); outline-offset: -2px; }
+.cal-day.sel { background: var(--brand); color: var(--brand-ink); }
+.dots { display: flex; gap: 3px; height: 6px; }
+.dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.dot.test { background: #d9342b; } .dot.quiz { background: #f2a33a; } .dot.hw { background: #3a7bd5; } .dot.info { background: #9a9a95; }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 10px; }
+.cal-legend .dot { margin-right: 4px; }
+:root[data-theme="legia"] .seg, :root[data-theme="legia"] .seg button, :root[data-theme="legia"] .cal-day { border-radius: 0; }
+:root[data-theme="legia"] .seg button { text-transform: uppercase; font-weight: 800; }

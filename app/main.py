@@ -383,6 +383,7 @@ async def _load_agenda(lib: Librus) -> dict[str, Any]:
             "category": cats.get(ev.category_id, "Wydarzenie") if ev.category_id else "Wydarzenie",
             "subject": subjects.get(ev.subject_id, "") if ev.subject_id else "",
             "content": ev.content,
+            "kind": _event_label(cats.get(ev.category_id, "") if ev.category_id else "")[1],
         }
         for ev in agenda if ev.date and ev.date >= today
     ]

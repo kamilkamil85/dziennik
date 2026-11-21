@@ -31,8 +31,8 @@ def today(name: str) -> dict[str, Any]:
         "student": name, "today": _d(0),
         "days": [{"date": _d(0), "lessons": lessons}, {"date": _d(1), "lessons": [dict(l, canceled=False, substitution=False, original=None) for l in lessons[:4]]}],
         "soon": [
-            {"date": _d(2), "category": "Sprawdzian", "subject": "Matematyka", "content": "Ułamki dziesiętne, dział 3"},
-            {"date": _d(4), "category": "Kartkówka", "subject": "Język angielski", "content": "Słówka unit 4"},
+            {"date": _d(2), "category": "Sprawdzian", "subject": "Matematyka", "content": "Ułamki dziesiętne, dział 3", "kind": "test"},
+            {"date": _d(4), "category": "Kartkówka", "subject": "Język angielski", "content": "Słówka unit 4", "kind": "quiz"},
         ],
         "lucky": {"number": 17, "day": _d(0)},
         "updated": "demo",
@@ -54,9 +54,9 @@ def grades() -> dict[str, Any]:
 def agenda() -> dict[str, Any]:
     return {
         "events": [
-            {"date": _d(2), "time": None, "category": "Sprawdzian", "subject": "Matematyka", "content": "Ułamki dziesiętne, dział 3"},
-            {"date": _d(4), "time": None, "category": "Kartkówka", "subject": "Język angielski", "content": "Słówka unit 4"},
-            {"date": _d(9), "time": "17:00", "category": "Wywiadówka", "subject": "", "content": "Zebranie z rodzicami, sala 12"},
+            {"date": _d(2), "time": None, "category": "Sprawdzian", "subject": "Matematyka", "content": "Ułamki dziesiętne, dział 3", "kind": "test"},
+            {"date": _d(4), "time": None, "category": "Kartkówka", "subject": "Język angielski", "content": "Słówka unit 4", "kind": "quiz"},
+            {"date": _d(9), "time": "17:00", "category": "Wywiadówka", "subject": "", "content": "Zebranie z rodzicami, sala 12", "kind": "info"},
         ],
         "homework": [{"topic": "Wypracowanie", "text": "Opis przeżyć wewnętrznych, min. 200 słów.", "date": _d(-1), "due": _d(3), "attachments": 0}],
         "updated": "demo",
