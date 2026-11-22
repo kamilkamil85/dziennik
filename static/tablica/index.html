@@ -14,77 +14,84 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
-:root { --bg: #f4f3ef; --card: #ffffff; --ink: #1b1d1c; --muted: #6d716e; --line: #e4e2dc;
-  --good: #2e8b57; --mid: #c98a12; --bad: #c0392b; --today: #1b1d1c; }
+:root { --bg: #ffffff; --ink: #161716; --muted: #8a8d8a; --soft: #b9bbb8; --line: #ececea; --accent: #2f6fdf;
+  --good: #2e9a5e; --mid: #d19a1c; --bad: #d0493a; }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
-body { padding: 20px 24px; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 14px; overflow: hidden; }
-.patron { font-size: 16px; line-height: 1.4; color: var(--muted); padding: 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+body { padding: 34px 44px 26px; display: grid; grid-template-rows: auto auto minmax(0, 1fr); grid-row-gap: 26px; overflow: hidden; }
+svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.12em; }
+
+/* góra: zegar | pogoda */
+.top { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-column-gap: 56px; align-items: end; }
+.clock { font-size: 112px; font-weight: 300; line-height: .82; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+.date { font-size: 22px; color: var(--muted); margin-top: 14px; }
+.date::first-letter { text-transform: uppercase; }
+.commute { margin-top: 8px; font-size: 18px; color: var(--muted); }
+.commute b { color: var(--ink); font-weight: 600; }
+.wx { display: grid; grid-template-columns: auto repeat(3, auto) auto; grid-column-gap: 34px; align-items: end; justify-self: end; }
+.now { display: flex; align-items: center; }
+.now .ico { font-size: 64px; color: var(--ink); margin-right: 16px; line-height: 1; }
+.now .t { font-size: 72px; font-weight: 300; line-height: .85; letter-spacing: -.03em; }
+.now .d { font-size: 16px; color: var(--muted); margin-top: 8px; white-space: nowrap; }
+.fd .n, .air .n { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 500; }
+.fd .v { font-size: 24px; font-weight: 400; margin-top: 6px; white-space: nowrap; }
+.fd .v .ico { color: var(--muted); margin-right: 8px; }
+.fd .p, .air .p { font-size: 14px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
+.air { padding-left: 34px; border-left: 1px solid var(--line); }
+.air .v { font-size: 24px; margin-top: 6px; white-space: nowrap; }
+.air .v .dot { margin-right: 8px; vertical-align: 3px; }
+.warn { grid-column: 1 / -1; justify-self: end; color: var(--bad); font-size: 16px; font-weight: 600; margin-top: 10px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); display: inline-block; }
+
+.patron { font-size: 16px; line-height: 1.45; color: var(--muted); max-width: 1100px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .patron b { color: var(--ink); font-weight: 600; }
 .patron:empty { display: none; }
-.patron .cov, .cov-tag { color: #1f4e8c; }
-.cov-tag { font-size: 13px; font-weight: 700; background: #e6eef9; border-radius: 6px; padding: 3px 6px; }
+.patron .cov, .cov-tag { color: var(--accent); }
+.cov-tag { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
 
-/* góra: zegar + blok pogoda/powietrze */
-.top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: stretch; }
-.time { display: flex; flex-direction: column; justify-content: center; padding-right: 8px; }
-.clock { font-size: 96px; font-weight: 600; line-height: .9; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.date { font-size: 22px; color: var(--muted); margin-top: 8px; }
-.commute { margin-top: 10px; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-.wx { background: var(--card); border-radius: 18px; padding: 14px 18px; display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)) auto; gap: 14px; align-items: center; }
-.now { display: flex; align-items: center; gap: 12px; padding-right: 6px; }
-.now .ico { font-size: 56px; line-height: 1; }
-.now .t { font-size: 60px; font-weight: 600; line-height: 1; }
-.now .d { font-size: 16px; color: var(--muted); margin-top: 4px; }
-.fd { border-left: 1px solid var(--line); padding-left: 14px; }
-.fd .n { font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-.fd .v { font-size: 26px; font-weight: 600; margin-top: 2px; white-space: nowrap; }
-.fd .v .ico { font-size: 26px; margin-right: 4px; }
-.fd .p { font-size: 14px; color: var(--muted); }
-.air { border-left: 1px solid var(--line); padding-left: 14px; min-width: 150px; }
-.air .n { font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-.air .v { font-size: 22px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-.air .p { font-size: 14px; color: var(--muted); }
-.warn { grid-column: 1 / -1; background: #fde9d9; color: #8a3a0a; font-size: 16px; font-weight: 600; padding: 6px 12px; border-radius: 10px; }
-.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--muted); flex: none; display: inline-block; }
-
-/* tydzień */
-.week { display: grid; grid-template-columns: 1.55fr repeat(6, minmax(0, 1fr)); gap: 10px; min-height: 0; }
-.day { background: var(--card); border-radius: 16px; padding: 12px 12px; display: flex; flex-direction: column; gap: 7px; overflow: hidden; min-width: 0; }
-.day.focus { outline: 3px solid var(--today); outline-offset: -3px; }
-.day.past { opacity: .55; }
-.day.weekend { background: #eeece6; }
-.dh { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
-.dh b { font-size: 20px; }
-.dh span { font-size: 14px; color: var(--muted); white-space: nowrap; }
-.day:not(.big) .dh { flex-direction: column; align-items: flex-start; gap: 0; }
-.kr { display: flex; align-items: flex-start; gap: 8px; font-size: 16px; line-height: 1.3; }
-.chip { width: 24px; height: 24px; border-radius: 50%; background: var(--c); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
-.kr .s { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.kr .x { color: var(--muted); font-size: 14px; }
-.kr .nt { color: var(--bad); font-size: 13px; font-weight: 600; }
-.ev { font-size: 15px; line-height: 1.3; border-left: 4px solid var(--c); padding: 3px 0 3px 8px; background: color-mix(in srgb, var(--c) 9%, transparent); border-radius: 0 6px 6px 0; }
-.ev .h { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 600; }
-.sep { height: 1px; background: var(--line); margin: 2px 0; }
-.big .kr { font-size: 20px; }
-.big .chip { width: 30px; height: 30px; font-size: 15px; }
-.big .kr .x { font-size: 17px; }
-.big .kr .nt { font-size: 16px; }
-.big .ev { font-size: 18px; }
+/* tydzień: bez kart, tylko cienkie linie */
+.week { grid-row: 3; display: grid; grid-template-columns: 1.6fr repeat(6, minmax(0, 1fr)); min-height: 0; border-top: 1px solid var(--line); }
+.day { padding: 18px 16px 0; border-left: 1px solid var(--line); overflow: hidden; min-width: 0; color: var(--muted); }
+.day:first-child { border-left: 0; padding-left: 0; padding-right: 26px; }
+.day.past { opacity: .45; }
+.day > * + * { margin-top: 12px; }
+.dh b { display: block; font-size: 15px; font-weight: 500; text-transform: uppercase; letter-spacing: .1em; }
+.dh span { display: block; font-size: 13px; color: var(--soft); margin-top: 3px; }
+.day.focus .dh b { color: var(--ink); font-weight: 700; }
+.day.focus .dh::after { content: ""; display: block; width: 22px; height: 3px; background: var(--accent); margin-top: 8px; border-radius: 2px; }
+.kr { display: flex; align-items: flex-start; font-size: 16px; line-height: 1.35; }
+.chip { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; margin: 6px 10px 0 0; }
+.kr .nm { font-size: 13px; color: var(--soft); }
+.kr .s { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kr .x { font-size: 14px; }
+.kr .nt { color: var(--bad); font-size: 13px; }
+.ev { font-size: 15px; line-height: 1.35; color: var(--ink); padding-left: 18px; position: relative; }
+.ev::before { content: ""; position: absolute; left: 0; top: 3px; bottom: 3px; width: 2px; border-radius: 1px; background: var(--c); }
+.ev .h { display: block; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; }
+.sep { height: 0; }
+/* dziś: większe, czarne */
+.big { color: var(--ink); }
+.big .dh b { font-size: 34px; font-weight: 600; letter-spacing: -.01em; text-transform: none; }
+.big .dh span { display: none; }
+.big .kr { font-size: 22px; }
+.big .chip { width: 11px; height: 11px; margin: 8px 14px 0 0; }
+.big .kr .x { font-size: 17px; color: var(--muted); }
+.big .kr .nm { font-size: 15px; }
+.big .ev { font-size: 20px; padding-left: 20px; }
 .big .ev .h { font-size: 15px; }
-.big .dh b { font-size: 26px; }
-.stamp { position: fixed; right: 26px; bottom: 6px; font-size: 12px; color: var(--muted); }
+.stamp { position: fixed; right: 44px; bottom: 10px; font-size: 12px; color: var(--soft); }
 
 /* noc */
-body.night { --bg: #050505; --ink: #8b8b86; --muted: #55554f; grid-template-rows: 1fr; place-items: center; }
+body.night { --bg: #000; --ink: #8b8b86; --muted: #55554f; grid-template-rows: 1fr; place-items: center; }
 body.night .week, body.night .patron, body.night .warn, body.night .air, body.night .commute, body.night .stamp, body.night .fd { display: none; }
-body.night .top { grid-template-columns: 1fr; justify-items: center; gap: 30px; }
-body.night .time { align-items: center; }
-body.night .clock { font-size: 190px; font-weight: 500; }
-body.night .wx { background: none; grid-template-columns: auto; }
-body.night .ico { opacity: .45; filter: grayscale(1); }
+body.night .top { grid-template-columns: 1fr; justify-items: center; grid-row-gap: 40px; }
+body.night .time { text-align: center; }
+body.night .clock { font-size: 200px; font-weight: 200; }
+body.night .wx { justify-self: center; grid-template-columns: auto; }
+body.night .now .ico { color: var(--muted); }
 
-.lock { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; font-size: 22px; z-index: 9; }
+.lock { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 22px; z-index: 9; }
+.lock > * { margin: 8px 0; }
 .lock input { font-size: 24px; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--line); width: 360px; }
 .lock button { font-size: 22px; padding: 12px 28px; border-radius: 12px; border: 0; background: var(--ink); color: #fff; }
 .small { font-size: 15px; color: var(--muted); }
@@ -106,7 +113,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const DAYS = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"];
 const DSHORT = ["nd", "pn", "wt", "śr", "cz", "pt", "sb"];
 const MONTHS = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
-const COLORS = { legia: "#0b7a3e", fiolet: "#8e6cc7", magia: "#7a1420" };
+const COLORS = { legia: "#1f9a55", fiolet: "#9a7ad6", magia: "#b3283a" };
 const PLACE = { lat: 52.0874, lon: 21.2492, teryt: "1417" };
 const TOMORROW_FROM = 17, NIGHT_FROM = 22, NIGHT_TO = 6;
 let board = null, weather = null, warns = [], imgw = null;
@@ -158,12 +165,22 @@ async function loadBoard() {
 }
 
 // ---------- pogoda i powietrze ----------
-const WMO = { 0: ["☀️", "bezchmurnie"], 1: ["🌤️", "pogodnie"], 2: ["⛅", "zachmurzenie"], 3: ["☁️", "pochmurno"],
-  45: ["🌫️", "mgła"], 48: ["🌫️", "szadź"], 51: ["🌦️", "mżawka"], 53: ["🌦️", "mżawka"], 55: ["🌧️", "mżawka"],
-  56: ["🌧️", "marznąca mżawka"], 57: ["🌧️", "marznąca mżawka"], 61: ["🌧️", "słaby deszcz"], 63: ["🌧️", "deszcz"], 65: ["🌧️", "ulewa"],
-  66: ["🌧️", "marznący deszcz"], 67: ["🌧️", "marznący deszcz"], 71: ["🌨️", "słaby śnieg"], 73: ["🌨️", "śnieg"], 75: ["❄️", "dużo śniegu"],
-  77: ["🌨️", "śnieg"], 80: ["🌦️", "przelotny deszcz"], 81: ["🌧️", "przelotny deszcz"], 82: ["⛈️", "ulewa"],
-  85: ["🌨️", "przelotny śnieg"], 86: ["❄️", "przelotny śnieg"], 95: ["⛈️", "burza"], 96: ["⛈️", "burza z gradem"], 99: ["⛈️", "burza z gradem"] };
+const SVG = {
+  sun: '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>',
+  part: '<path d="M8 3.5v1.6M3.3 8.5h1.6M4.6 5.1l1.1 1.1M11.4 5.1l-1.1 1.1"/><path d="M5.6 10.6a3 3 0 1 1 5-3"/><path d="M8 20h9.5a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6 1.2A3 3 0 0 0 8 20z"/>',
+  cloud: '<path d="M7 19h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.4A3.4 3.4 0 0 0 7 19z"/>',
+  fog: '<path d="M7 13.5h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.4"/><path d="M4 17h16M6 20.5h12"/>',
+  rain: '<path d="M7 15h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.4A3.4 3.4 0 0 0 7 15z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/>',
+  snow: '<path d="M7 15h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.4A3.4 3.4 0 0 0 7 15z"/><path d="M8 19h.01M12 18h.01M16 19h.01M10 21.5h.01M14 21.5h.01" stroke-width="2.4"/>',
+  storm: '<path d="M7 15h10.5a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.4A3.4 3.4 0 0 0 7 15z"/><path d="M12.5 15.5l-2 3.5h3l-2 3.5"/>',
+};
+const icon = (k) => k ? `<svg class="i" viewBox="0 0 24 24">${SVG[k]}</svg>` : "";
+const WMO = { 0: ["sun", "bezchmurnie"], 1: ["part", "pogodnie"], 2: ["part", "zachmurzenie"], 3: ["cloud", "pochmurno"],
+  45: ["fog", "mgła"], 48: ["fog", "szadź"], 51: ["rain", "mżawka"], 53: ["rain", "mżawka"], 55: ["rain", "mżawka"],
+  56: ["rain", "marznąca mżawka"], 57: ["rain", "marznąca mżawka"], 61: ["rain", "słaby deszcz"], 63: ["rain", "deszcz"], 65: ["rain", "ulewa"],
+  66: ["rain", "marznący deszcz"], 67: ["rain", "marznący deszcz"], 71: ["snow", "słaby śnieg"], 73: ["snow", "śnieg"], 75: ["snow", "dużo śniegu"],
+  77: ["snow", "śnieg"], 80: ["rain", "przelotny deszcz"], 81: ["rain", "przelotny deszcz"], 82: ["storm", "ulewa"],
+  85: ["snow", "przelotny śnieg"], 86: ["snow", "przelotny śnieg"], 95: ["storm", "burza"], 96: ["storm", "burza z gradem"], 99: ["storm", "burza z gradem"] };
 const AIR = { 1: ["bardzo dobre", "var(--good)"], 2: ["dobre", "var(--good)"], 3: ["umiarkowane", "var(--mid)"], 4: ["dostateczne", "var(--mid)"], 5: ["złe", "var(--bad)"], 6: ["bardzo złe", "var(--bad)"] };
 
 async function loadWeather() {
@@ -187,13 +204,13 @@ function renderWx() {
     const d = weather.daily, cur = weather.current;
     const t = imgw?.temperatura != null ? Math.round(parseFloat(imgw.temperatura)) : Math.round(cur.temperature_2m);
     const [ico, txt] = WMO[cur.weather_code] || ["", ""];
-    h += `<div class="now"><span class="ico">${ico}</span><div><div class="t">${t}°</div>
+    h += `<div class="now"><span class="ico">${icon(ico)}</span><div><div class="t">${t}°</div>
       <div class="d">${esc(txt)} · dziś ${Math.round(d.temperature_2m_min[0])}°/${Math.round(d.temperature_2m_max[0])}°</div></div></div>`;
     for (let i = 1; i <= 3; i++) {
       const dt = new Date(d.time[i] + "T12:00:00"), [fi] = WMO[d.weather_code[i]] || [""];
       const p = d.precipitation_probability_max[i];
       h += `<div class="fd"><div class="n">${i === 1 ? "jutro" : DAYS[dt.getDay()]}</div>
-        <div class="v"><span class="ico">${fi}</span>${Math.round(d.temperature_2m_min[i])}° / ${Math.round(d.temperature_2m_max[i])}°</div>
+        <div class="v"><span class="ico">${icon(fi)}</span>${Math.round(d.temperature_2m_min[i])}° / ${Math.round(d.temperature_2m_max[i])}°</div>
         <div class="p">${p >= 30 ? `opady ${p}%` : "&nbsp;"}</div></div>`;
     }
   }
@@ -203,7 +220,7 @@ function renderWx() {
     h += `<div class="air"><div class="n">powietrze</div><div class="v"><span class="dot" style="background:${col}"></span>${lab}</div>
       <div class="p">PM2,5 ${esc(s.pm25)} · PM10 ${esc(s.pm10)}</div></div>`;
   }
-  h += warns.slice(0, 2).map((w) => `<div class="warn">⚠ ${esc(w.nazwa_zdarzenia)} (stopień ${esc(w.stopien)}) · ${esc(w.obowiazuje_od.slice(11, 16))}–${esc(w.obowiazuje_do.slice(11, 16))}${w.obowiazuje_do.slice(0, 10) !== iso(clock()) ? " (do jutra)" : ""}</div>`).join("");
+  h += warns.slice(0, 2).map((w) => `<div class="warn">${esc(w.nazwa_zdarzenia)} (stopień ${esc(w.stopien)}) · ${esc(w.obowiazuje_od.slice(11, 16))}–${esc(w.obowiazuje_do.slice(11, 16))}${w.obowiazuje_do.slice(0, 10) !== iso(clock()) ? " (do jutra)" : ""}</div>`).join("");
   $("#wx").innerHTML = h;
 }
 
@@ -230,14 +247,14 @@ function renderWeek() {
       if (sd?.start) parts.push(`<span class="s">${esc(sd.start)}–${esc(sd.end)}</span>`);
       for (const a of acts) parts.push(`<span class="x">${esc(a.co)} ${esc(a.od)}${a.do && i === 0 ? "–" + esc(a.do) : ""}</span>`);
       const notes = (sd?.notes || []).map((n) => `<div class="nt">${esc(n)}</div>`).join("");
-      body += `<div class="kr" style="--c:${COLORS[k.theme] || "#555"}"><span class="chip" style="--c:${COLORS[k.theme] || "#555"}" title="${esc(k.name)}">${esc(k.name[0])}</span>
-        <div>${parts.join("<br>")}${notes}</div></div>`;
+      body += `<div class="kr" style="--c:${COLORS[k.theme] || "#555"}"><span class="chip"></span>
+        <div><div class="nm">${esc(k.name)}</div>${parts.join("<br>")}${notes}</div></div>`;
     }
     const evs = (board.events || []).filter((e) => e.date === d);
     if (evs.length && body) body += `<div class="sep"></div>`;
     body += evs.map((e) => `<div class="ev" style="--c:${esc(e.color || "#888")}">${e.allDay ? "" : `<span class="h">${esc(e.from)}${e.to && i === 0 ? "–" + esc(e.to) : ""}</span> `}${esc(e.title)}</div>`).join("");
     if (date.getDate() === 18 && i > 0) body = `<div class="cov-tag">Dzień Przymierza</div>` + body;
-    if (!body) body = `<div class="small">${weekend ? "weekend" : "—"}</div>`;
+    if (!body) body = `<div class="small">${weekend ? "wolne" : "—"}</div>`;
     h += `<div class="${cls}"><div class="dh"><b>${title}</b><span>${i === 1 ? DSHORT[date.getDay()] + " " : ""}${date.getDate()}.${String(date.getMonth() + 1).padStart(2, "0")}</span></div>${body}</div>`;
   }
   $("#week").innerHTML = h;
@@ -246,7 +263,7 @@ function renderCommute() {
   const c = board?.commute, now = clock(), hr = now.getHours() + now.getMinutes() / 60;
   if (!c || hr < 6.75 || hr > 9.25) { $("#commute").innerHTML = ""; return; }
   const col = c.delay >= 10 ? "var(--bad)" : c.delay >= 5 ? "var(--mid)" : "var(--good)";
-  $("#commute").innerHTML = `<span class="dot" style="background:${col}"></span>🚗 do pracy <b>${c.minutes} min</b>${c.delay > 0 ? ` <span class="small">(+${c.delay} korki)</span>` : ""} <span class="small">· ${esc(c.at)}</span>`;
+  $("#commute").innerHTML = `<span class="dot" style="background:${col};margin-right:8px"></span>do pracy <b>${c.minutes} min</b>${c.delay > 0 ? ` <span class="small">(+${c.delay} korki)</span>` : ""} <span class="small">· ${esc(c.at)}</span>`;
 }
 function renderPatron() {
   const p = board?.patron;
