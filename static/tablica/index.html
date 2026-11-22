@@ -131,7 +131,7 @@ function askPassword() {
   if ($(".lock")) return;
   const d = document.createElement("div");
   d.className = "lock";
-  d.innerHTML = `<div>Hasło tablicy</div><input type="password" id="pw" autocomplete="current-password"><button id="go">Otwórz</button><div id="err" class="small"></div>`;
+  d.innerHTML = `<div>Hasło tablicy</div><input type="password" id="pw" autocomplete="current-password"><label class="small"><input type="checkbox" id="show" style="width:auto"> pokaż hasło</label><button id="go">Otwórz</button><div id="err" class="small"></div>`;
   document.body.appendChild(d);
   const go = async () => {
     try {
@@ -140,6 +140,7 @@ function askPassword() {
       store("boardKey", b64e(raw)); d.remove(); render();
     } catch { $("#err").textContent = "Złe hasło albo brak danych."; }
   };
+  $("#show").onchange = (e) => { $("#pw").type = e.target.checked ? "text" : "password"; $("#pw").focus(); };
   $("#go").onclick = go; $("#pw").onkeydown = (e) => e.key === "Enter" && go();
 }
 async function loadBoard() {
