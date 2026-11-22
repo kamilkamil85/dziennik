@@ -2,7 +2,14 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" id="vp" content="width=device-width, initial-scale=1">
+<script>
+// Tablety często mają ~960 px szerokości (w px CSS). Układamy jak na 1280 px i pomniejszamy.
+(function () {
+  var w = Math.max(screen.width, screen.height);
+  if (w < 1280) document.getElementById("vp").setAttribute("content", "width=1280");
+})();
+</script>
 <title>Tablica</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
