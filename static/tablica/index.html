@@ -373,7 +373,7 @@ function tmMenu() {
   tmOpen(head("Minutnik") + `<div class="grid">${DISHES.map((d, i) => `<button class="tile" data-a="dish" data-v="${i}">${d.name}<small>${d.note}</small></button>`).join("")}</div>
     <div class="label">Dowolny czas</div>
     <div class="row"><button class="min" data-a="dec">−1</button><div class="val" id="fm">${freeMin} min</div><button class="min" data-a="inc">+1</button>
-      ${[3, 5, 10, 15, 20, 30].map((m) => `<button class="min" data-a="set" data-v="${m}">${m}</button>`).join("")}
+      ${[3, 5, 10, 15, 20, 30, 40].map((m) => `<button class="min" data-a="set" data-v="${m}">${m}</button>`).join("")}
       <button class="go" data-a="free">Start</button></div>`);
 }
 function tmDish(i) {
