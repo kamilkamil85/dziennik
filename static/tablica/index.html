@@ -22,22 +22,22 @@ body { padding: 34px 44px 26px; display: grid; grid-template-rows: auto auto min
 svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.12em; }
 
 /* góra: zegar | pogoda */
-.top { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-column-gap: 56px; align-items: end; }
+.top { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-column-gap: 40px; align-items: end; }
 .clock { font-size: 112px; font-weight: 400; line-height: .82; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
 .date { font-size: 24px; color: var(--muted); margin-top: 14px; }
 .date::first-letter { text-transform: uppercase; }
 .commute { margin-top: 8px; font-size: 18px; color: var(--muted); }
 .commute b { color: var(--ink); font-weight: 600; }
-.wx { display: grid; grid-template-columns: auto repeat(3, auto) auto; grid-column-gap: 34px; align-items: end; justify-self: end; }
+.wx { display: grid; grid-template-columns: auto repeat(3, auto) auto; grid-column-gap: 22px; align-items: end; justify-content: end; min-width: 0; }
 .now { display: flex; align-items: center; }
-.now .ico { font-size: 64px; color: var(--ink); margin-right: 16px; line-height: 1; }
+.now .ico { font-size: 54px; color: var(--ink); margin-right: 16px; line-height: 1; }
 .now .t { font-size: 72px; font-weight: 400; line-height: .85; letter-spacing: -.03em; }
-.now .d { font-size: 16px; color: var(--muted); margin-top: 8px; white-space: nowrap; }
+.now .d { font-size: 16px; color: var(--muted); margin-top: 8px; max-width: 150px; line-height: 1.3; }
 .fd .n, .air .n { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 500; }
 .fd .v { font-size: 24px; font-weight: 400; margin-top: 6px; white-space: nowrap; }
 .fd .v .ico { color: var(--muted); margin-right: 8px; }
 .fd .p, .air .p { font-size: 14px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
-.air { padding-left: 34px; border-left: 1px solid var(--line); }
+.air { padding-left: 22px; border-left: 1px solid var(--line); }
 .air .v { font-size: 24px; margin-top: 6px; white-space: nowrap; }
 .air .v .dot { margin-right: 8px; vertical-align: 3px; }
 .warn { grid-column: 1 / -1; justify-self: end; color: var(--bad); font-size: 16px; font-weight: 600; margin-top: 10px; }
@@ -116,7 +116,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const DAYS = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"];
 const DSHORT = ["nd", "pn", "wt", "śr", "cz", "pt", "sb"];
 const MONTHS = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
-const COLORS = { legia: "#1f9a55", fiolet: "#9a7ad6", magia: "#b3283a" };
+const COLORS = { legia: "#1f9a55", fiolet: "#9a7ad6", magia: "#e0559a" };
 const PLACE = { lat: 52.0874, lon: 21.2492, teryt: "1417" };
 const TOMORROW_FROM = 17, NIGHT_FROM = 22, NIGHT_TO = 6;
 let board = null, weather = null, warns = [], imgw = null;
@@ -256,9 +256,13 @@ function renderWeek() {
       for (const a of activitiesFor(k.name, date))
         add(`a|${a.co}|${a.od}|${a.do}`, "1" + a.od.padStart(5, "0"), `<span class="x">${esc(a.co)} ${esc(a.od)}${a.do && i === 0 ? "–" + esc(a.do) : ""}</span>`, k);
     }
+    let prev = "";
     for (const r of [...rows.values()].sort((a, b) => a.sort.localeCompare(b.sort))) {
+      const names = r.kids.map((k) => esc(k.name)).join(", ");
+      if (names === prev) { body = body.replace(/<\/div><\/div>$/, `<br>${r.html}</div></div>`); continue; } // te same dzieci pod rząd: bez powtarzania imienia
+      prev = names;
       const dots = r.kids.map((k) => `<span class="chip" style="--c:${COLORS[k.theme] || "#555"}"></span>`).join("");
-      body += `<div class="kr"><span class="chips">${dots}</span><div><div class="nm">${r.kids.map((k) => esc(k.name)).join(", ")}</div>${r.html}</div></div>`;
+      body += `<div class="kr"><span class="chips">${dots}</span><div><div class="nm">${names}</div>${r.html}</div></div>`;
     }
     const evs = (board.events || []).filter((e) => e.date === d);
     if (evs.length && body) body += `<div class="sep"></div>`;
