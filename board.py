@@ -155,6 +155,19 @@ def calendars(now: datetime) -> list[dict[str, Any]]:
     return out
 
 
+def holidays(now: datetime) -> list[dict[str, Any]]:
+    """Coroczne święta rodzinne z sekretu SWIETA: jedna linia "MM-DD|tekst" (np. "03-08|Urodziny Kamila")."""
+    from datetime import timedelta
+    wanted = {(now.date() + timedelta(days=i)).strftime("%m-%d"): (now.date() + timedelta(days=i)) for i in range(7)}
+    out = []
+    for line in os.environ.get("SWIETA", "").splitlines():
+        md, _, text = line.strip().partition("|")
+        if md.strip() in wanted and text.strip():
+            out.append({"date": wanted[md.strip()].isoformat(), "cal": "Święta", "color": "#d19a1c",
+                        "title": text.strip(), "allDay": True, "from": None, "to": None})
+    return out
+
+
 def _demo_events(now: datetime) -> list[dict[str, Any]]:
     if os.environ.get("DEMO") != "1":
         return []
@@ -188,7 +201,8 @@ def build(everything: dict[str, dict], children: dict, now: datetime) -> dict[st
         "generated": now.strftime("%Y-%m-%d %H:%M"),
         "kids": kids,
         "activities": activities(),
-        "events": calendars(now) or _demo_events(now),
+        "events": sorted(holidays(now) + (calendars(now) or _demo_events(now)),
+                         key=lambda x: (x["date"], not x["allDay"], x["from"] or "")),
         "patron": patron(now),
         "smog": smog(),
         "commute": commute(now),

@@ -69,3 +69,7 @@ Jeśli JSON będzie miał błąd (np. brak przecinka), tablica pokaże wszystko 
 **Bateria:** tablet stale na ładowarce może z czasem mieć spuchniętą baterię. Bezpieczniej podłączyć go przez gniazdko z timerem albo inteligentną wtyczkę i ładować np. 6:00–8:00 i 15:00–17:00. Ekran włączony cały czas zużyje baterię mniej więcej w tym tempie, więc sprawdź pierwszego dnia, czy poziom się utrzymuje, i w razie potrzeby wydłuż okna ładowania.
 
 **Test wyglądu o innej godzinie:** dopisz do adresu np. `?czas=2026-11-25T07:40`.
+
+## Święta rodzinne (sekret SWIETA)
+
+Urodziny, imieniny i rocznice, które co roku wypadają tego samego dnia. Jedna linia to jedno święto w formacie `MM-DD|tekst`, na przykład `03-08|Urodziny Kamila`. Tablica pokazuje je w widoku tygodnia jako wydarzenia na cały dzień. Daty trzymamy w sekrecie, bo repo jest publiczne.
