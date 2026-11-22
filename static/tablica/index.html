@@ -98,6 +98,36 @@ body.night .now .ico { color: var(--muted); }
 .lock input { font-size: 24px; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--line); width: 360px; }
 .lock button { font-size: 22px; padding: 12px 28px; border-radius: 12px; border: 0; background: var(--ink); color: #fff; }
 .small { font-size: 15px; color: var(--muted); }
+
+/* minutnik */
+.tbtn { position: fixed; left: 44px; bottom: 14px; font: inherit; font-size: 17px; font-weight: 600; color: var(--ink); background: #f1f1ef; border: 0; border-radius: 999px; padding: 10px 20px; z-index: 5; }
+.tbtn.run { background: var(--accent); color: #fff; font-variant-numeric: tabular-nums; }
+.tbtn.ring { background: var(--bad); color: #fff; }
+body.night .tbtn:not(.run):not(.ring) { display: none; }
+.tm { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 8; padding: 36px 48px; display: flex; flex-direction: column; color: var(--ink); }
+.tm-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; }
+.tm-head h2 { margin: 0; font-size: 34px; font-weight: 600; }
+.tm button { font: inherit; border: 0; border-radius: 16px; background: #f1f1ef; color: var(--ink); }
+.tm .x { font-size: 20px; padding: 12px 22px; }
+.tm .grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 16px; }
+.tm .tile { font-size: 26px; font-weight: 600; padding: 30px 20px; text-align: left; }
+.tm .tile small { display: block; font-size: 16px; font-weight: 400; color: var(--muted); margin-top: 6px; }
+.tm .label { font-size: 14px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 600; margin: 30px 0 12px; }
+.tm .row { display: flex; flex-wrap: wrap; align-items: center; }
+.tm .row > * { margin: 0 12px 12px 0; }
+.tm .min { font-size: 24px; font-weight: 600; padding: 18px 26px; min-width: 90px; }
+.tm .val { font-size: 56px; font-weight: 600; min-width: 170px; text-align: center; font-variant-numeric: tabular-nums; }
+.tm .go { background: var(--accent); color: #fff; font-size: 26px; font-weight: 600; padding: 20px 44px; }
+.tm .steps { font-size: 24px; line-height: 1.45; margin: 0; padding-left: 34px; max-width: 900px; }
+.tm .steps li { margin-bottom: 12px; }
+.tm .plan { font-size: 20px; color: var(--muted); margin: 18px 0 26px; }
+.tm .big-t { font-size: 200px; font-weight: 500; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; text-align: center; margin-top: 10px; }
+.tm .stage { font-size: 30px; text-align: center; font-weight: 600; }
+.tm .next { font-size: 20px; text-align: center; color: var(--muted); margin-top: 10px; }
+.tm .center { display: flex; justify-content: center; margin-top: 34px; }
+.tm .center > * { margin: 0 8px; }
+.tm.ring { background: #fde9e6; }
+.tm.ring .big-t { color: var(--bad); }
 </style>
 </head>
 <body>
@@ -108,6 +138,7 @@ body.night .now .ico { color: var(--muted); }
 <section class="patron" id="patron"></section>
 <section class="week" id="week"></section>
 <div class="stamp" id="stamp"></div>
+<button class="tbtn" id="tbtn">Minutnik</button>
 
 <script>
 "use strict";
@@ -299,6 +330,107 @@ function tick() {
   if (now.getSeconds() === 0) render();
   if (hh === 3 && now.getMinutes() === 0 && now.getSeconds() === 0) location.reload(); // nowa wersja strony raz na dobę
 }
+
+
+// ---------- minutnik ----------
+// Ilości wody i czasy to typowe wartości z opakowań; zmień tutaj, jeśli u was wychodzi inaczej.
+const DISHES = [
+  { name: "Ryż basmati", note: "na sypko", water: { 100: 150, 200: 300 }, cook: { 100: 10, 200: 12 }, rest: 10,
+    steps: (g, w) => [`Wsyp ${g} g ryżu do sitka i płucz pod zimną wodą, aż woda będzie przezroczysta.`,
+      `Zagotuj w garnku ${w} ml wody z małą szczyptą soli.`, "Wsyp ryż do wrzątku, zamieszaj raz, przykryj pokrywką.",
+      "Zmniejsz gaz na najmniejszy i naciśnij Start. Nie podnoś pokrywki."] },
+  { name: "Kasza gryczana", note: "palona", water: { 100: 200, 200: 400 }, cook: { 100: 15, 200: 15 }, rest: 10,
+    steps: (g, w) => [`Przepłucz ${g} g kaszy na sitku.`, `Zagotuj ${w} ml wody z solą (i łyżeczką oleju, żeby kasza się nie kleiła).`,
+      "Wsyp kaszę do wrzątku, przykryj pokrywką.", "Zmniejsz gaz na najmniejszy i naciśnij Start. Nie mieszaj."] },
+  { name: "Kasza jęczmienna", note: "perłowa", water: { 100: 250, 200: 500 }, cook: { 100: 20, 200: 22 }, rest: 10,
+    steps: (g, w) => [`Przepłucz ${g} g kaszy na sitku, aż woda będzie czysta.`, `Zagotuj ${w} ml wody z solą.`,
+      "Wsyp kaszę do wrzątku, zamieszaj, przykryj pokrywką.", "Zmniejsz gaz na mały i naciśnij Start."] },
+];
+let T = null; // { stages: [{name, min}], i, end, ringing, title }
+let audio = null, beepTimer = null;
+const fmt = (ms) => { const t = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
+function beep() {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    [0, .35, .7].forEach((d) => { const o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(audio.destination);
+      g.gain.setValueAtTime(.5, audio.currentTime + d); g.gain.setValueAtTime(0, audio.currentTime + d + .22);
+      o.start(audio.currentTime + d); o.stop(audio.currentTime + d + .25); });
+  } catch {}
+}
+function stopRing() { clearInterval(beepTimer); beepTimer = null; if (T) T.ringing = false; }
+function tmClose() { const m = $(".tm"); if (m) m.remove(); }
+function tmOpen(html) {
+  tmClose();
+  const d = document.createElement("div"); d.className = "tm"; d.innerHTML = html; document.body.appendChild(d);
+  d.addEventListener("click", (e) => { const b = e.target.closest("[data-a]"); if (b) tmAction(b.dataset.a, b.dataset.v); });
+  return d;
+}
+const head = (title, back) => `<div class="tm-head"><h2>${title}</h2><div>${back ? `<button class="x" data-a="${back}">Wstecz</button> ` : ""}<button class="x" data-a="close">Zamknij</button></div></div>`;
+let freeMin = 5;
+function tmMenu() {
+  if (T) return tmRun();
+  tmOpen(head("Minutnik") + `<div class="grid">${DISHES.map((d, i) => `<button class="tile" data-a="dish" data-v="${i}">${d.name}<small>${d.note}</small></button>`).join("")}</div>
+    <div class="label">Dowolny czas</div>
+    <div class="row"><button class="min" data-a="dec">−1</button><div class="val" id="fm">${freeMin} min</div><button class="min" data-a="inc">+1</button>
+      ${[3, 5, 10, 15, 20, 30].map((m) => `<button class="min" data-a="set" data-v="${m}">${m}</button>`).join("")}
+      <button class="go" data-a="free">Start</button></div>`);
+}
+function tmDish(i) {
+  const d = DISHES[i];
+  tmOpen(head(d.name, "menu") + `<div class="label">Ile?</div><div class="row">${[100, 200].map((g) => `<button class="tile" data-a="grams" data-v="${i}:${g}">${g} g<small>${d.water[g]} ml wody</small></button>`).join("")}</div>`);
+}
+function tmRecipe(i, g) {
+  const d = DISHES[i], w = d.water[g], c = d.cook[g];
+  tmOpen(head(`${d.name}, ${g} g`, "back:" + i) + `<ol class="steps">${d.steps(g, w).map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
+    <div class="plan">Potem: ${c} min gotowania na małym gazie, a po sygnale wyłącz gaz i zostaw pod pokrywką na ${d.rest} min.</div>
+    <div><button class="go" data-a="start" data-v="${i}:${g}">Start: ${c} min gotowania</button></div>`);
+}
+function tmStart(title, stages) {
+  stopRing(); beep(); // pierwszy dźwięk po dotknięciu odblokowuje audio w przeglądarce
+  T = { title, stages, i: 0, end: Date.now() + stages[0].min * 60e3, ringing: false };
+  tmRun();
+}
+function tmRun() {
+  if (!T) return tmMenu();
+  const st = T.stages[T.i], nx = T.stages[T.i + 1];
+  const m = tmOpen(head(T.title) + `<div class="stage" id="tst"></div><div class="big-t" id="tt"></div><div class="next" id="tnx"></div><div class="center" id="tbt"></div>`);
+  tmUpdate();
+}
+function tmUpdate() {
+  const btn = $("#tbtn");
+  if (!T) { btn.className = "tbtn"; btn.textContent = "Minutnik"; return; }
+  const st = T.stages[T.i], nx = T.stages[T.i + 1], left = T.end - Date.now();
+  if (left <= 0 && !T.ringing) { T.ringing = true; beep(); beepTimer = setInterval(beep, 2500); if (!$(".tm")) tmRun(); }
+  btn.className = "tbtn " + (T.ringing ? "ring" : "run");
+  btn.textContent = T.ringing ? "Minutnik: koniec!" : `${st.name} ${fmt(left)}`;
+  const m = $(".tm"); if (!m || !$("#tt")) return;
+  m.classList.toggle("ring", T.ringing);
+  $("#tt").textContent = T.ringing ? "0:00" : fmt(left);
+  $("#tst").textContent = T.ringing ? (nx ? st.done : "Gotowe!") : st.name;
+  $("#tnx").textContent = !T.ringing && nx ? `potem: ${nx.name.toLowerCase()} ${nx.min} min` : "";
+  const want = T.ringing ? (nx ? `<button class="go" data-a="next">${esc(st.go)}</button>` : `<button class="go" data-a="done">OK</button>`)
+    : `<button class="x" data-a="plus">+1 min</button><button class="x" data-a="cancel">Anuluj</button>`;
+  if ($("#tbt").dataset.k !== want) { $("#tbt").innerHTML = want; $("#tbt").dataset.k = want; }
+}
+function tmAction(a, v) {
+  if (a === "close") return tmClose();
+  if (a === "menu") return tmMenu();
+  if (a === "dish") return tmDish(+v);
+  if (a === "back:" + v) return tmDish(+v);
+  if (a.startsWith("back:")) return tmDish(+a.slice(5));
+  if (a === "grams") { const [i, g] = v.split(":").map(Number); return tmRecipe(i, g); }
+  if (a === "dec" || a === "inc" || a === "set") { freeMin = a === "set" ? +v : Math.max(1, Math.min(180, freeMin + (a === "inc" ? 1 : -1))); $("#fm").textContent = `${freeMin} min`; return; }
+  if (a === "free") return tmStart(`Minutnik ${freeMin} min`, [{ name: "Odliczanie", min: freeMin }]);
+  if (a === "start") { const [i, g] = v.split(":").map(Number), d = DISHES[i];
+    return tmStart(`${d.name}, ${g} g`, [{ name: "Gotowanie na gazie", min: d.cook[g], done: "Wyłącz gaz! Zostaw pod pokrywką.", go: "Gaz wyłączony: start odpoczynku" },
+      { name: "Odpoczynek pod pokrywką", min: d.rest }]); }
+  if (a === "next") { stopRing(); T.i++; T.end = Date.now() + T.stages[T.i].min * 60e3; return tmRun(); }
+  if (a === "plus") { T.end += 60e3; return tmUpdate(); }
+  if (a === "cancel" || a === "done") { stopRing(); T = null; tmClose(); return tmUpdate(); }
+}
+$("#tbtn").onclick = () => { if (T && T.ringing && !$(".tm")) return tmRun(); tmMenu(); };
+setInterval(tmUpdate, 250);
 
 tick(); setInterval(tick, 1000);
 loadBoard(); setInterval(loadBoard, 5 * 60e3);
