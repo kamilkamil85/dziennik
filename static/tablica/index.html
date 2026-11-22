@@ -60,7 +60,9 @@ svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width:
 .day.focus .dh b { color: var(--ink); font-weight: 700; }
 .day.focus .dh::after { content: ""; display: block; width: 22px; height: 3px; background: var(--accent); margin-top: 8px; border-radius: 2px; }
 .kr { display: flex; align-items: flex-start; font-size: 18px; line-height: 1.35; }
-.chip { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; margin: 6px 10px 0 0; }
+.chips { display: flex; flex: none; margin: 7px 10px 0 0; }
+.chip { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--bg); }
+.chip + .chip { margin-left: -2px; }
 .kr .nm { font-size: 14px; color: var(--soft); }
 .kr .s { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .kr .x { font-size: 16px; color: var(--muted); }
@@ -74,7 +76,8 @@ svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width:
 .big .dh b { font-size: 34px; font-weight: 600; letter-spacing: -.01em; text-transform: none; }
 .big .dh span { display: none; }
 .big .kr { font-size: 22px; }
-.big .chip { width: 11px; height: 11px; margin: 8px 14px 0 0; }
+.big .chips { margin: 9px 14px 0 0; }
+.big .chip { width: 11px; height: 11px; }
 .big .kr .x { font-size: 17px; color: var(--muted); }
 .big .kr .nm { font-size: 15px; }
 .big .ev { font-size: 20px; padding-left: 20px; }
@@ -239,16 +242,23 @@ function renderWeek() {
     const title = i === 0 ? "Dziś" : i === 1 ? "Jutro" : DAYS[date.getDay()];
     const cls = ["day", i === 0 ? "big" : "", weekend ? "weekend" : "", (evening ? i === 1 : i === 0) ? "focus" : "", evening && i === 0 ? "past" : ""].join(" ");
     let body = "";
+    // wiersze: lekcje i zajęcia; te same godziny / te same zajęcia kilku dzieci pokazujemy raz
+    const rows = new Map(), add = (key, sort, html, k) => {
+      if (!rows.has(key)) rows.set(key, { sort, html, kids: [] });
+      rows.get(key).kids.push(k);
+    };
     for (const k of board.kids) {
       const sd = (k.days || []).find((x) => x.date === d);
-      const acts = activitiesFor(k.name, date);
-      if (!sd?.start && !acts.length) continue;
-      const parts = [];
-      if (sd?.start) parts.push(`<span class="s">${esc(sd.start)}–${esc(sd.end)}</span>`);
-      for (const a of acts) parts.push(`<span class="x">${esc(a.co)} ${esc(a.od)}${a.do && i === 0 ? "–" + esc(a.do) : ""}</span>`);
-      const notes = (sd?.notes || []).map((n) => `<div class="nt">${esc(n)}</div>`).join("");
-      body += `<div class="kr" style="--c:${COLORS[k.theme] || "#555"}"><span class="chip"></span>
-        <div><div class="nm">${esc(k.name)}</div>${parts.join("<br>")}${notes}</div></div>`;
+      if (sd?.start) {
+        const notes = (sd.notes || []).map((n) => `<div class="nt">${esc(n)}</div>`).join("");
+        add(`s|${sd.start}|${sd.end}|${notes}`, "0" + sd.start.padStart(5, "0"), `<span class="s">${esc(sd.start)}–${esc(sd.end)}</span>${notes}`, k);
+      }
+      for (const a of activitiesFor(k.name, date))
+        add(`a|${a.co}|${a.od}|${a.do}`, "1" + a.od.padStart(5, "0"), `<span class="x">${esc(a.co)} ${esc(a.od)}${a.do && i === 0 ? "–" + esc(a.do) : ""}</span>`, k);
+    }
+    for (const r of [...rows.values()].sort((a, b) => a.sort.localeCompare(b.sort))) {
+      const dots = r.kids.map((k) => `<span class="chip" style="--c:${COLORS[k.theme] || "#555"}"></span>`).join("");
+      body += `<div class="kr"><span class="chips">${dots}</span><div><div class="nm">${r.kids.map((k) => esc(k.name)).join(", ")}</div>${r.html}</div></div>`;
     }
     const evs = (board.events || []).filter((e) => e.date === d);
     if (evs.length && body) body += `<div class="sep"></div>`;
