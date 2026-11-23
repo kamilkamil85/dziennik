@@ -272,7 +272,7 @@ function renderWeek() {
   for (let i = 0; i < 7; i++) {
     const date = addDays(now, i), d = iso(date), weekend = date.getDay() === 0 || date.getDay() === 6;
     const title = i === 0 ? "Dziś" : i === 1 ? "Jutro" : DAYS[date.getDay()];
-    const cls = ["day", i === 0 ? "big" : "", weekend ? "weekend" : "", (evening ? i === 1 : i === 0) ? "focus" : "", evening && i === 0 ? "past" : ""].join(" ");
+    const cls = ["day", i === 0 ? "big" : "", weekend ? "weekend" : "", (evening ? i === 1 : i === 0) ? "focus" : ""].join(" ");
     let body = "";
     // wiersze: lekcje i zajęcia; te same godziny / te same zajęcia kilku dzieci pokazujemy raz
     const rows = new Map(), add = (key, sort, html, k) => {
