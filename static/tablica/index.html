@@ -128,6 +128,7 @@ body.night .tbtn:not(.run):not(.ring) { display: none; }
 .tm .center > * { margin: 0 8px; }
 .tm.ring { background: #fde9e6; }
 .tm.ring .big-t { color: var(--bad); }
+body.night::after { content: "Dotknij, aby zobaczyć plan dnia"; position: fixed; bottom: 22px; left: 0; right: 0; text-align: center; font-size: 16px; color: #3a3a37; }
 </style>
 </head>
 <body>
@@ -322,11 +323,17 @@ function render() {
   if (board) $("#stamp").textContent = `dane z ${board.generated.slice(11)}`;
 }
 
+// noc działa jak wygaszacz: dotknięcie ekranu pokazuje tablicę dzienną na 5 minut
+let wakeUntil = 0;
+document.addEventListener("click", (e) => {
+  if (document.body.classList.contains("night")) { wakeUntil = Date.now() + 5 * 60e3; e.stopPropagation(); e.preventDefault(); render(); tick(); }
+}, true);
 function tick() {
   const now = clock(), hh = now.getHours();
   $("#clock").textContent = `${hh}:${String(now.getMinutes()).padStart(2, "0")}`;
   $("#date").textContent = `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
-  document.body.classList.toggle("night", hh >= NIGHT_FROM || hh < NIGHT_TO);
+  const isNight = hh >= NIGHT_FROM || hh < NIGHT_TO;
+  document.body.classList.toggle("night", isNight && Date.now() > wakeUntil);
   if (now.getSeconds() === 0) render();
   if (hh === 3 && now.getMinutes() === 0 && now.getSeconds() === 0) location.reload(); // nowa wersja strony raz na dobę
 }
