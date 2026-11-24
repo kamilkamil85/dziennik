@@ -83,6 +83,8 @@ svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width:
 .big .ev { font-size: 20px; padding-left: 20px; }
 .big .ev .h { font-size: 15px; }
 .stamp { position: fixed; right: 44px; bottom: 10px; font-size: 12px; color: var(--soft); }
+.stamp.old { font-size: 17px; font-weight: 600; color: #fff; background: var(--bad); padding: 6px 14px; border-radius: 10px; bottom: 14px; }
+.kr .x .h { font-variant-numeric: tabular-nums; }
 
 /* noc */
 body.night { --bg: #000; --ink: #8b8b86; --muted: #55554f; grid-template-rows: 1fr; place-items: center; }
@@ -160,6 +162,7 @@ function store(k, v) { try { if (v === undefined) return localStorage.getItem(k)
 const b64d = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 const b64e = (u) => btoa(String.fromCharCode(...new Uint8Array(u)));
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const hm = (t) => esc(String(t || "").replace(/^0(\d)/, "$1"));
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
 async function fetchBox() {
@@ -265,6 +268,14 @@ function activitiesFor(name, date) {
   return (board.activities || []).filter((a) => a.kto === name && !(a.bez || []).includes(day) && (a.data ? a.data === day : a.dni.includes(dow)))
     .sort((a, b) => a.od.localeCompare(b.od, undefined, { numeric: true }));
 }
+// "Hela HPV", "wycieczka Jadzi" -> kolor dziecka (rdzeń imienia bez ostatniej litery, od początku słowa)
+function ownerColor(title) {
+  for (const k of board.kids) {
+    const stem = k.name.slice(0, -1).replace(/[^\p{L}]/gu, "");
+    if (stem.length >= 3 && new RegExp("(^|[^\\p{L}])" + stem + "\\p{L}{0,3}($|[^\\p{L}])", "iu").test(title)) return COLORS[k.theme];
+  }
+  return null;
+}
 function renderWeek() {
   if (!board) return;
   const now = clock(), evening = now.getHours() >= TOMORROW_FROM;
@@ -283,10 +294,10 @@ function renderWeek() {
       const sd = (k.days || []).find((x) => x.date === d);
       if (sd?.start) {
         const notes = (sd.notes || []).map((n) => `<div class="nt">${esc(n)}</div>`).join("");
-        add(`s|${sd.start}|${sd.end}|${notes}`, "0" + sd.start.padStart(5, "0"), `<span class="s">${esc(sd.start)}–${esc(sd.end)}</span>${notes}`, k);
+        add(`s|${sd.start}|${sd.end}|${notes}`, "0" + sd.start.padStart(5, "0"), `<span class="s">${hm(sd.start)}–${hm(sd.end)}</span>${notes}`, k);
       }
       for (const a of activitiesFor(k.name, date))
-        add(`a|${a.co}|${a.od}|${a.do}`, "1" + a.od.padStart(5, "0"), `<span class="x">${esc(a.co)} ${esc(a.od)}${a.do && i === 0 ? "–" + esc(a.do) : ""}</span>`, k);
+        add(`a|${a.co}|${a.od}|${a.do}`, "1" + a.od.padStart(5, "0"), `<span class="x"><span class="h">${hm(a.od)}${a.do && i === 0 ? "–" + hm(a.do) : ""}</span> ${esc(a.co)}</span>`, k);
     }
     // wszystkie wiersze tych samych dzieci razem, pod jednym imieniem
     const blocks = new Map();
@@ -295,13 +306,14 @@ function renderWeek() {
       if (!blocks.has(names)) blocks.set(names, { kids: r.kids, html: [] });
       blocks.get(names).html.push(r.html);
     }
-    for (const [names, b] of blocks) {
+    const order = (b) => b.kids.map((k) => board.kids.indexOf(k)).join(",");
+    for (const [names, b] of [...blocks].sort((x, y) => order(x[1]).localeCompare(order(y[1])))) {
       const dots = b.kids.map((k) => `<span class="chip" style="--c:${COLORS[k.theme] || "#555"}"></span>`).join("");
       body += `<div class="kr"><span class="chips">${dots}</span><div><div class="nm">${names}</div>${b.html.join("<br>")}</div></div>`;
     }
     const evs = (board.events || []).filter((e) => e.date === d);
     if (evs.length && body) body += `<div class="sep"></div>`;
-    body += evs.map((e) => `<div class="ev" style="--c:${esc(e.color || "#888")}">${e.allDay ? "" : `<span class="h">${esc(e.from)}${e.to && i === 0 ? "–" + esc(e.to) : ""}</span> `}${esc(e.title)}</div>`).join("");
+    body += evs.map((e) => `<div class="ev" style="--c:${esc(ownerColor(e.title) || e.color || "#888")}">${e.allDay ? "" : `<span class="h">${hm(e.from)}${e.to && i === 0 ? "–" + hm(e.to) : ""}</span> `}${esc(e.title)}</div>`).join("");
     if (date.getDate() === 18 && i > 0) body = `<div class="cov-tag">Dzień Przymierza</div>` + body;
     if (!body) body = `<div class="small">${weekend ? "wolne" : "—"}</div>`;
     h += `<div class="${cls}"><div class="dh"><b>${title}</b><span>${i === 1 ? DSHORT[date.getDay()] + " " : ""}${date.getDate()}.${String(date.getMonth() + 1).padStart(2, "0")}</span></div>${body}</div>`;
@@ -312,7 +324,7 @@ function renderCommute() {
   const c = board?.commute, now = clock(), hr = now.getHours() + now.getMinutes() / 60;
   if (!c || hr < 6.75 || hr > 9.25) { $("#commute").innerHTML = ""; return; }
   const col = c.delay >= 10 ? "var(--bad)" : c.delay >= 5 ? "var(--mid)" : "var(--good)";
-  $("#commute").innerHTML = `<span class="dot" style="background:${col};margin-right:8px"></span>do pracy <b>${c.minutes} min</b>${c.delay > 0 ? ` <span class="small">(+${c.delay} korki)</span>` : ""} <span class="small">· ${esc(c.at)}</span>`;
+  $("#commute").innerHTML = `do pracy <b>${c.minutes} min</b>${c.delay >= 3 ? ` <span style="color:${col}">· korki +${c.delay} min</span>` : ""}`;
 }
 function renderPatron() {
   const p = board?.patron;
@@ -323,7 +335,11 @@ function renderPatron() {
 }
 function render() {
   renderPatron(); renderWeek(); renderCommute(); renderWx();
-  if (board) $("#stamp").textContent = `dane z ${board.generated.slice(11)}`;
+  if (board) {
+    const age = (clock() - new Date(board.generated.replace(" ", "T"))) / 36e5;
+    $("#stamp").textContent = age > 2 ? `Uwaga: dane nieaktualne, ostatnio pobrane ${board.generated.slice(0, 10) === iso(clock()) ? "o " : board.generated.slice(8, 10) + "." + board.generated.slice(5, 7) + " o "}${hm(board.generated.slice(11))}` : `dane z ${hm(board.generated.slice(11))}`;
+    $("#stamp").classList.toggle("old", age > 2);
+  }
 }
 
 // noc działa jak wygaszacz: dotknięcie ekranu pokazuje tablicę dzienną na 5 minut
