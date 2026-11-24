@@ -43,7 +43,7 @@ svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width:
 .warn { grid-column: 1 / -1; justify-self: end; color: var(--bad); font-size: 16px; font-weight: 600; margin-top: 10px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); display: inline-block; }
 
-.patron { font-size: 17px; line-height: 1.45; color: var(--muted); max-width: 1100px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.patron { font-size: 17px; line-height: 1.45; color: var(--muted); max-width: 1180px; }
 .patron b { color: var(--ink); font-weight: 600; }
 .patron:empty { display: none; }
 .patron .cov, .cov-tag { color: var(--accent); }
@@ -288,13 +288,16 @@ function renderWeek() {
       for (const a of activitiesFor(k.name, date))
         add(`a|${a.co}|${a.od}|${a.do}`, "1" + a.od.padStart(5, "0"), `<span class="x">${esc(a.co)} ${esc(a.od)}${a.do && i === 0 ? "–" + esc(a.do) : ""}</span>`, k);
     }
-    let prev = "";
+    // wszystkie wiersze tych samych dzieci razem, pod jednym imieniem
+    const blocks = new Map();
     for (const r of [...rows.values()].sort((a, b) => a.sort.localeCompare(b.sort))) {
       const names = r.kids.map((k) => esc(k.name)).join(", ");
-      if (names === prev) { body = body.replace(/<\/div><\/div>$/, `<br>${r.html}</div></div>`); continue; } // te same dzieci pod rząd: bez powtarzania imienia
-      prev = names;
-      const dots = r.kids.map((k) => `<span class="chip" style="--c:${COLORS[k.theme] || "#555"}"></span>`).join("");
-      body += `<div class="kr"><span class="chips">${dots}</span><div><div class="nm">${names}</div>${r.html}</div></div>`;
+      if (!blocks.has(names)) blocks.set(names, { kids: r.kids, html: [] });
+      blocks.get(names).html.push(r.html);
+    }
+    for (const [names, b] of blocks) {
+      const dots = b.kids.map((k) => `<span class="chip" style="--c:${COLORS[k.theme] || "#555"}"></span>`).join("");
+      body += `<div class="kr"><span class="chips">${dots}</span><div><div class="nm">${names}</div>${b.html.join("<br>")}</div></div>`;
     }
     const evs = (board.events || []).filter((e) => e.date === d);
     if (evs.length && body) body += `<div class="sep"></div>`;
@@ -328,14 +331,19 @@ let wakeUntil = 0;
 document.addEventListener("click", (e) => {
   if (document.body.classList.contains("night")) { wakeUntil = Date.now() + 5 * 60e3; e.stopPropagation(); e.preventDefault(); render(); tick(); }
 }, true);
+let lastMinute = 0;
+const loadedDay = iso(clock());
 function tick() {
   const now = clock(), hh = now.getHours();
   $("#clock").textContent = `${hh}:${String(now.getMinutes()).padStart(2, "0")}`;
   $("#date").textContent = `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
   const isNight = hh >= NIGHT_FROM || hh < NIGHT_TO;
   document.body.classList.toggle("night", isNight && Date.now() > wakeUntil);
-  if (now.getSeconds() === 0) render();
-  if (hh === 3 && now.getMinutes() === 0 && now.getSeconds() === 0) location.reload(); // nowa wersja strony raz na dobę
+  // co minutę odświeżamy widok; porównujemy minuty, a nie "sekunda == 0", bo uśpiony tablet potrafi gubić sekundy
+  const minute = Math.floor(now.getTime() / 60e3);
+  if (minute !== lastMinute) { lastMinute = minute; render(); }
+  // nowa doba: przeładowanie strony (świeża wersja, czysty stan); po 3:00, gdy nikt nie używa
+  if (iso(now) !== loadedDay && hh >= 3 && !T) location.reload();
 }
 
 
@@ -440,6 +448,7 @@ $("#tbtn").onclick = () => { if (T && T.ringing && !$(".tm")) return tmRun(); tm
 setInterval(tmUpdate, 250);
 
 tick(); setInterval(tick, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { lastMinute = 0; tick(); loadBoard(); loadWeather(); } });
 loadBoard(); setInterval(loadBoard, 5 * 60e3);
 loadWeather(); setInterval(loadWeather, 15 * 60e3);
 loadWarnings(); setInterval(loadWarnings, 30 * 60e3);

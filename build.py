@@ -170,11 +170,14 @@ async def main() -> None:
     (SITE / "config.js").write_text('window.DZ_STATIC = true;\n')
     (SITE / ".nojekyll").write_text("")
     print(f"Gotowe: {len(kids)} dzieci, {stamp}, świeżych sekcji: {fresh_total}")
-    deploy = fresh_total > 0 or DEMO
-    if not deploy:
+    # Tablica (dojazd, kalendarze, patron) jest zawsze świeża, więc publikujemy ją także wtedy, gdy Librus
+    # nie odpowiada, o ile mamy poprzednie dane dzieci (żeby nie nadpisać strony pustymi plikami).
+    have_old = all(d.get("today") for d in everything.values())
+    deploy = fresh_total > 0 or DEMO or bool(board_pw and have_old)
+    if fresh_total == 0 and not DEMO:
         # Librus nie odpowiada (zdarza się z serwerów GitHuba). Strona zostaje z ostatnimi danymi,
         # przebieg kończy się bez błędu, żeby nie wysyłać maili co 30 minut.
-        print("::warning::Librus nie odpowiada, strona zostaje bez zmian. Kolejna próba przy następnym przebiegu.")
+        print("::warning::Librus nie odpowiada, dane dzieci zostają z poprzedniego przebiegu." + (" Tablica odświeżona." if deploy else ""))
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
             f.write(f"deploy={'true' if deploy else 'false'}\n")
