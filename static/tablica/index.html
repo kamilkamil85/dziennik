@@ -31,7 +31,15 @@ svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width:
 .bus { margin-top: 6px; font-size: 17px; color: var(--muted); white-space: nowrap; }
 .bus b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .bus .ln { font-size: 13px; font-weight: 600; border: 1px solid var(--line); border-radius: 5px; padding: 0 4px; margin: 0 2px; }
-body.night .bus { display: none; }
+.bbtn { left: 170px; }
+body.night .bbtn { display: none; }
+.tm .deps { display: flex; flex-wrap: wrap; }
+.tm .dep { font-size: 22px; padding: 8px 14px; margin: 0 10px 10px 0; background: #f6f6f4; border-radius: 10px; font-variant-numeric: tabular-nums; }
+.tm .dep b { font-weight: 600; }
+.tm .dep .ln { font-size: 14px; color: var(--muted); margin-left: 6px; }
+.tm .dep.first { background: var(--accent); color: #fff; }
+.tm .dep.first .ln { color: #dbe6fb; }
+.tm .src { font-size: 15px; color: var(--muted); margin-top: auto; line-height: 1.5; }
 .wx { display: grid; grid-template-columns: auto repeat(3, auto) auto; grid-column-gap: 22px; align-items: end; justify-content: end; min-width: 0; }
 .now { display: flex; align-items: center; }
 .now .ico { font-size: 54px; color: var(--ink); margin-right: 16px; line-height: 1; }
@@ -139,13 +147,14 @@ body.night::after { content: "Dotknij, aby zobaczyć plan dnia"; position: fixed
 </head>
 <body>
 <section class="top">
-  <div class="time"><div class="clock" id="clock">--:--</div><div class="date" id="date"></div><div class="commute" id="commute"></div><div class="bus" id="bus"></div></div>
+  <div class="time"><div class="clock" id="clock">--:--</div><div class="date" id="date"></div><div class="commute" id="commute"></div></div>
   <div class="wx" id="wx"></div>
 </section>
 <section class="patron" id="patron"></section>
 <section class="week" id="week"></section>
 <div class="stamp" id="stamp"></div>
 <button class="tbtn" id="tbtn">Minutnik</button>
+<button class="tbtn bbtn" id="bbtn">Autobusy</button>
 
 <script>
 "use strict";
@@ -349,19 +358,29 @@ const BUSES = [
   { ln: "K51", to: "Michalin", wd: "3:51 4:32 4:54 5:51 6:17 6:47 7:21 7:41 8:01 8:56 9:54 10:56 11:56 12:39 12:56 13:49 14:12 14:49 15:17 15:49 16:06 16:49 17:17 17:49 18:17 18:49 19:34 20:06 21:26 22:21",
     we: "5:10 6:14 7:22 8:27 9:55 11:30 12:34 13:54 14:59 16:04 17:04 18:04 19:39 21:04 22:42" },
 ];
-function renderBus() {
-  const now = clock(), we = now.getDay() === 0 || now.getDay() === 6, mins = now.getHours() * 60 + now.getMinutes();
-  const list = [];
-  for (const b of BUSES) for (const t of (we ? b.we : b.wd).split(" ")) {
-    const [h, m] = t.split(":").map(Number), at = h * 60 + m;
-    if (at >= mins) list.push({ at, t, b });
-  }
-  list.sort((x, y) => x.at - y.at);
-  const next = list.slice(0, 3);
-  $("#bus").innerHTML = next.length ? "🚌 Ługi: " + next.map((x) => `<b>${x.t}</b><span class="ln">${x.b.ln}</span>`).join(" ") : "";
+// M1 z przystanku Danuty. W weekend kursy z "S" jeżdżą w soboty, z "N" w niedziele i święta.
+const M1 = { wd: "4:54 5:53 7:07 8:16 9:39 10:44 12:00 13:06 14:35 15:43 17:00 18:05 19:25 20:31 21:42 22:41",
+  sat: "5:00 7:15 9:30 11:45 14:00 16:10 18:20 20:30", sun: "7:15 9:30 11:45 14:00 16:10 18:20" };
+function busOpen() {
+  const now = clock(), dow = now.getDay(), we = dow === 0 || dow === 6, mins = now.getHours() * 60 + now.getMinutes();
+  const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const deps = (items, n) => {
+    const left = items.filter((x) => toMin(x.t) >= mins).sort((x, y) => toMin(x.t) - toMin(y.t)).slice(0, n);
+    return left.length ? `<div class="deps">${left.map((x, i) => `<div class="dep${i === 0 ? " first" : ""}"><b>${x.t}</b><span class="ln">${x.ln}${x.to ? " " + x.to : ""}</span></div>`).join("")}</div>`
+      : `<div class="small">Dziś już nic nie odjeżdża.</div>`;
+  };
+  const lugi = [];
+  for (const b of BUSES) for (const t of (we ? b.we : b.wd).split(" ")) lugi.push({ t, ln: b.ln, to: b.to === "Otwock" ? "" : b.to });
+  const m1 = (dow === 6 ? M1.sat : dow === 0 ? M1.sun : M1.wd).split(" ").map((t) => ({ t, ln: "M1" }));
+  tmOpen(head("Autobusy" + (we ? " (rozkład weekendowy)" : "")) +
+    `<div class="label">Pętla Ługi · w stronę Otwocka · najbliższe odjazdy</div>${deps(lugi, 14)}
+     <div class="label">Danuty · M1</div>${deps(m1, 7)}
+     <div class="src">Rozkłady przepisane 25 listopada 2026 (Ługi: wersja na czas remontu, ważna od 21.09.2026). Święta nie są rozpoznawane.<br>
+     Sprawdź, czy są aktualne: woloszka.com.pl/karczew-osiedle-lugi</div>`);
 }
+$("#bbtn").onclick = busOpen;
 function render() {
-  renderPatron(); renderWeek(); renderCommute(); renderWx(); renderBus();
+  renderPatron(); renderWeek(); renderCommute(); renderWx();
   if (board) {
     // dwa różne znaczniki: kiedy przebiegła tablica (dojazd, patron, kalendarze) i kiedy ostatnio odpowiedział Librus
     const when = (g) => (g.slice(0, 10) === iso(clock()) ? "" : g.slice(8, 10) + "." + g.slice(5, 7) + " ") + hm(g.slice(11));
