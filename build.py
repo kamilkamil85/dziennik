@@ -163,6 +163,9 @@ async def main() -> None:
     if board_pw:
         import board
         b = board.build(everything, m.CHILDREN, datetime.now(m.TZ))
+        # kiedy ostatnio udało się pobrać Librusa (dane mogą być z poprzedniego przebiegu)
+        asofs = [d["today"].get("asof") for d in everything.values() if isinstance(d.get("today"), dict)]
+        b["librus"] = min([a for a in asofs if a] or [stamp])
         (SITE / "data" / "board.json").write_text(json.dumps(encrypt(b, board_pw, 99)), encoding="utf-8")
     pack_sessions()
     (SITE / "data" / "kids.json").write_text(json.dumps({"kids": kids, "parent": bool(parent_pw), "generated": stamp,

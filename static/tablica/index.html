@@ -28,6 +28,10 @@ svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width:
 .date::first-letter { text-transform: uppercase; }
 .commute { margin-top: 8px; font-size: 18px; color: var(--muted); }
 .commute b { color: var(--ink); font-weight: 600; }
+.bus { margin-top: 6px; font-size: 17px; color: var(--muted); white-space: nowrap; }
+.bus b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.bus .ln { font-size: 13px; font-weight: 600; border: 1px solid var(--line); border-radius: 5px; padding: 0 4px; margin: 0 2px; }
+body.night .bus { display: none; }
 .wx { display: grid; grid-template-columns: auto repeat(3, auto) auto; grid-column-gap: 22px; align-items: end; justify-content: end; min-width: 0; }
 .now { display: flex; align-items: center; }
 .now .ico { font-size: 54px; color: var(--ink); margin-right: 16px; line-height: 1; }
@@ -135,7 +139,7 @@ body.night::after { content: "Dotknij, aby zobaczyć plan dnia"; position: fixed
 </head>
 <body>
 <section class="top">
-  <div class="time"><div class="clock" id="clock">--:--</div><div class="date" id="date"></div><div class="commute" id="commute"></div></div>
+  <div class="time"><div class="clock" id="clock">--:--</div><div class="date" id="date"></div><div class="commute" id="commute"></div><div class="bus" id="bus"></div></div>
   <div class="wx" id="wx"></div>
 </section>
 <section class="patron" id="patron"></section>
@@ -333,12 +337,41 @@ function renderPatron() {
   const covenant = clock().getDate() === 18 ? `<b class="cov">Dziś Dzień Przymierza.</b> ` : "";
   $("#patron").innerHTML = covenant + (!fresh ? "" : p ? `<b>Patron dnia: ${esc(p.name)}.</b> ${esc(p.text)}` : `<b>Patron dnia:</b> nie pobrano danych na ten dzień.`);
 }
+
+// ---------- autobusy z pętli Ługi (Wołoszka, rozkład na czas remontu od 21.09.2026) ----------
+// Tylko w stronę Otwocka. Bez K52 do Warsztatowej. wd = pon-pt (D i S), we = sob, nd i święta (C, 6, 7).
+const BUSES = [
+  { ln: "O1", to: "Otwock", wd: "6:29 7:19 7:44 8:29 9:24 10:44 12:24 14:14 14:44 15:19 16:19 17:19 18:14 18:34 20:24", we: "6:49 9:54 12:09 15:09" },
+  { ln: "G1", to: "Otwock", wd: "5:10 6:00 7:10 8:10 10:10 13:50 15:25 17:05 18:15", we: "7:10 9:55 13:00 15:55" },
+  { ln: "S1", to: "Otwock", wd: "6:28 7:18 8:33 9:48 13:43 16:03 17:28 18:43", we: "8:06 11:06 16:06 18:18" },
+  { ln: "K52", to: "Orla", wd: "4:16 4:45 5:09 5:29 6:16 6:31 6:59 7:35 7:59 8:31 9:29 10:29 11:29 12:29 13:29 14:06 14:31 15:11 15:36 16:01 16:31 16:56 17:31 17:56 18:31 19:16 19:41 20:44 21:44 22:44 23:44",
+    we: "4:16 5:26 6:31 7:36 8:56 10:31 11:56 13:56 15:16 16:31 17:36 18:36 19:46 20:26 22:06" },
+  { ln: "K51", to: "Michalin", wd: "3:51 4:32 4:54 5:51 6:17 6:47 7:21 7:41 8:01 8:56 9:54 10:56 11:56 12:39 12:56 13:49 14:12 14:49 15:17 15:49 16:06 16:49 17:17 17:49 18:17 18:49 19:34 20:06 21:26 22:21",
+    we: "5:10 6:14 7:22 8:27 9:55 11:30 12:34 13:54 14:59 16:04 17:04 18:04 19:39 21:04 22:42" },
+];
+function renderBus() {
+  const now = clock(), we = now.getDay() === 0 || now.getDay() === 6, mins = now.getHours() * 60 + now.getMinutes();
+  const list = [];
+  for (const b of BUSES) for (const t of (we ? b.we : b.wd).split(" ")) {
+    const [h, m] = t.split(":").map(Number), at = h * 60 + m;
+    if (at >= mins) list.push({ at, t, b });
+  }
+  list.sort((x, y) => x.at - y.at);
+  const next = list.slice(0, 3);
+  $("#bus").innerHTML = next.length ? "🚌 Ługi: " + next.map((x) => `<b>${x.t}</b><span class="ln">${x.b.ln}</span>`).join(" ") : "";
+}
 function render() {
-  renderPatron(); renderWeek(); renderCommute(); renderWx();
+  renderPatron(); renderWeek(); renderCommute(); renderWx(); renderBus();
   if (board) {
-    const age = (clock() - new Date(board.generated.replace(" ", "T"))) / 36e5;
-    $("#stamp").textContent = age > 2 ? `Uwaga: dane nieaktualne, ostatnio pobrane ${board.generated.slice(0, 10) === iso(clock()) ? "o " : board.generated.slice(8, 10) + "." + board.generated.slice(5, 7) + " o "}${hm(board.generated.slice(11))}` : `dane z ${hm(board.generated.slice(11))}`;
-    $("#stamp").classList.toggle("old", age > 2);
+    // dwa różne znaczniki: kiedy przebiegła tablica (dojazd, patron, kalendarze) i kiedy ostatnio odpowiedział Librus
+    const when = (g) => (g.slice(0, 10) === iso(clock()) ? "" : g.slice(8, 10) + "." + g.slice(5, 7) + " ") + hm(g.slice(11));
+    const age = (g) => (clock() - new Date(g.replace(" ", "T"))) / 36e5;
+    const lib = board.librus || board.generated;
+    let t = `tablica ${when(board.generated)} · Librus ${when(lib)}`, bad = false;
+    if (age(board.generated) > 1.5) { t = `Uwaga: tablica nieaktualna (dojazd, patron, kalendarze) od ${when(board.generated)}`; bad = true; }
+    else if (age(lib) > 3) { t = `Uwaga: lekcje z Librusa nieaktualne, ostatnio pobrane ${when(lib)}`; bad = true; }
+    $("#stamp").textContent = t;
+    $("#stamp").classList.toggle("old", bad);
   }
 }
 

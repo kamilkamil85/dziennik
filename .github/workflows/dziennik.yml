@@ -86,6 +86,15 @@ jobs:
 
       - id: deploy
         if: steps.build.outputs.deploy == 'true'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      # GitHub czasem nie widzi świeżo wgranej paczki ("No artifacts named github-pages"). Druga próba po chwili.
+      - name: Odczekaj przed drugą próbą
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 45
+      - id: deploy2
+        if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v4
 
       # GitHub wyłącza harmonogram po 60 dniach bez zmian w repo. Raz dziennie włączamy go ponownie.
