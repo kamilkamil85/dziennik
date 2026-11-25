@@ -143,6 +143,11 @@ body.night .tbtn:not(.run):not(.ring) { display: none; }
 .tm.ring { background: #fde9e6; }
 .tm.ring .big-t { color: var(--bad); }
 body.night::after { content: "Dotknij, aby zobaczyć plan dnia"; position: fixed; bottom: 22px; left: 0; right: 0; text-align: center; font-size: 16px; color: #3a3a37; }
+/* wieczór 19-22: ciemne tło, ten sam układ */
+body.evening { --bg: #131413; --ink: #ecece8; --muted: #a9aca8; --soft: #868985; --line: #2c2d2b; }
+body.evening .tbtn:not(.run):not(.ring), body.evening .tm button:not(.go), body.evening .tm .dep:not(.first) { background: #262725; color: var(--ink); }
+body.evening .lock button { background: #ecece8; color: #131413; }
+body.evening .tm.ring { background: #3a1714; }
 </style>
 </head>
 <body>
@@ -165,7 +170,7 @@ const DSHORT = ["nd", "pn", "wt", "śr", "cz", "pt", "sb"];
 const MONTHS = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
 const COLORS = { legia: "#1f9a55", fiolet: "#7b3fe4", magia: "#e0559a" };
 const PLACE = { lat: 52.0874, lon: 21.2492, teryt: "1417" };
-const TOMORROW_FROM = 17, NIGHT_FROM = 22, NIGHT_TO = 6;
+const EVENING_FROM = 19, TOMORROW_FROM = 17, NIGHT_FROM = 22, NIGHT_TO = 6;
 let board = null, weather = null, warns = [], imgw = null;
 // ?czas=RRRR-MM-DDTHH:MM symuluje inną godzinę (do testów wyglądu).
 const FAKE = new URLSearchParams(location.search).get("czas"), T0 = Date.now();
@@ -407,6 +412,7 @@ function tick() {
   $("#date").textContent = `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
   const isNight = hh >= NIGHT_FROM || hh < NIGHT_TO;
   document.body.classList.toggle("night", isNight && Date.now() > wakeUntil);
+  document.body.classList.toggle("evening", hh >= EVENING_FROM && hh < NIGHT_FROM || isNight && Date.now() <= wakeUntil);
   // co minutę odświeżamy widok; porównujemy minuty, a nie "sekunda == 0", bo uśpiony tablet potrafi gubić sekundy
   const minute = Math.floor(now.getTime() / 60e3);
   if (minute !== lastMinute) { lastMinute = minute; render(); }
