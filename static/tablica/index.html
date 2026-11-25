@@ -31,7 +31,9 @@ svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width:
 .bus { margin-top: 6px; font-size: 17px; color: var(--muted); white-space: nowrap; }
 .bus b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .bus .ln { font-size: 13px; font-weight: 600; border: 1px solid var(--line); border-radius: 5px; padding: 0 4px; margin: 0 2px; }
-.bbtn { left: 170px; }
+.tbtn.bbtn { left: 170px; }
+.tm .dep.gone { opacity: .35; }
+.tm .row .go, .tm .row .x { font-size: 18px; padding: 10px 20px; }
 body.night .bbtn { display: none; }
 .tm .deps { display: flex; flex-wrap: wrap; }
 .tm .dep { font-size: 22px; padding: 8px 14px; margin: 0 10px 10px 0; background: #f6f6f4; border-radius: 10px; font-variant-numeric: tabular-nums; }
@@ -366,24 +368,31 @@ const BUSES = [
 // M1 z przystanku Danuty. W weekend kursy z "S" jeżdżą w soboty, z "N" w niedziele i święta.
 const M1 = { wd: "4:54 5:53 7:07 8:16 9:39 10:44 12:00 13:06 14:35 15:43 17:00 18:05 19:25 20:31 21:42 22:41",
   sat: "5:00 7:15 9:30 11:45 14:00 16:10 18:20 20:30", sun: "7:15 9:30 11:45 14:00 16:10 18:20" };
-function busOpen() {
-  const now = clock(), dow = now.getDay(), we = dow === 0 || dow === 6, mins = now.getHours() * 60 + now.getMinutes();
+// mode: "" = najbliższe 5, "today" / "tomorrow" = cały rozkład danego dnia
+function busOpen(mode = "") {
+  const now = clock(), day = mode === "tomorrow" ? addDays(now, 1) : now, dow = day.getDay(), we = dow === 0 || dow === 6;
+  const mins = mode === "tomorrow" ? -1 : now.getHours() * 60 + now.getMinutes();
   const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-  const deps = (items, n) => {
-    const left = items.filter((x) => toMin(x.t) >= mins).sort((x, y) => toMin(x.t) - toMin(y.t)).slice(0, n);
-    return left.length ? `<div class="deps">${left.map((x, i) => `<div class="dep${i === 0 ? " first" : ""}"><b>${x.t}</b><span class="ln">${x.ln}${x.to ? " " + x.to : ""}</span></div>`).join("")}</div>`
-      : `<div class="small">Dziś już nic nie odjeżdża.</div>`;
+  const deps = (items) => {
+    items.sort((x, y) => toMin(x.t) - toMin(y.t));
+    const left = items.filter((x) => toMin(x.t) >= mins), show = mode ? items : left.slice(0, 5);
+    if (!show.length) return `<div class="small">Dziś już nic nie odjeżdża.</div>`;
+    return `<div class="deps">${show.map((x) => `<div class="dep${x === left[0] && mode !== "tomorrow" ? " first" : ""}${toMin(x.t) < mins ? " gone" : ""}"><b>${x.t}</b><span class="ln">${x.ln}${x.to ? " " + x.to : ""}</span></div>`).join("")}</div>`;
   };
   const lugi = [];
   for (const b of BUSES) for (const t of (we ? b.we : b.wd).split(" ")) lugi.push({ t, ln: b.ln, to: b.to === "Otwock" ? "" : b.to });
-  const m1 = (dow === 6 ? M1.sat : dow === 0 ? M1.sun : M1.wd).split(" ").map((t) => ({ t, ln: "M1", to: "Otwock" }));
-  tmOpen(head("Autobusy" + (we ? " (rozkład weekendowy)" : "")) +
-    `<div class="label">Pętla Ługi · w stronę Otwocka · najbliższe odjazdy</div>${deps(lugi, 14)}
-     <div class="label">Danuty · M1 · w stronę Otwocka</div>${deps(m1, 7)}
+  const m1 = (dow === 6 ? M1.sat : dow === 0 ? M1.sun : M1.wd).split(" ").map((t) => ({ t, ln: "M1" }));
+  const tabs = `<div class="row" style="margin-top:4px">${[["", "Najbliższe"], ["today", "Cały dziś"], ["tomorrow", "Jutro (" + DAYS[addDays(now, 1).getDay()] + ")"]]
+    .map(([v, l]) => `<button class="${v === mode ? "go" : "x"}" data-a="bus" data-v="${v}">${l}</button>`).join("")}</div>`;
+  const d = tmOpen(head("Autobusy" + (we ? " · rozkład weekendowy" : "")) + tabs +
+    `<div class="label">Pętla Ługi · w stronę Otwocka</div>${deps(lugi)}
+     <div class="label">Danuty · M1 · w stronę Otwocka</div>${deps(m1)}
      <div class="src">Rozkłady przepisane 25 listopada 2026 (Ługi: wersja na czas remontu, ważna od 21.09.2026). Święta nie są rozpoznawane.<br>
      Sprawdź, czy są aktualne: woloszka.com.pl/karczew-osiedle-lugi</div>`);
+  d.style.overflowY = "auto";
 }
-$("#bbtn").onclick = busOpen;
+$("#bbtn").onclick = () => busOpen();
+
 function render() {
   renderPatron(); renderWeek(); renderCommute(); renderWx();
   if (board) {
@@ -504,6 +513,7 @@ function tmUpdate() {
 }
 function tmAction(a, v) {
   if (a === "close") return tmClose();
+  if (a === "bus") return busOpen(v);
   if (a === "menu") return tmMenu();
   if (a === "dish") return tmDish(+v);
   if (a === "back:" + v) return tmDish(+v);
