@@ -371,10 +371,10 @@ function busOpen() {
   };
   const lugi = [];
   for (const b of BUSES) for (const t of (we ? b.we : b.wd).split(" ")) lugi.push({ t, ln: b.ln, to: b.to === "Otwock" ? "" : b.to });
-  const m1 = (dow === 6 ? M1.sat : dow === 0 ? M1.sun : M1.wd).split(" ").map((t) => ({ t, ln: "M1" }));
+  const m1 = (dow === 6 ? M1.sat : dow === 0 ? M1.sun : M1.wd).split(" ").map((t) => ({ t, ln: "M1", to: "Otwock" }));
   tmOpen(head("Autobusy" + (we ? " (rozkład weekendowy)" : "")) +
     `<div class="label">Pętla Ługi · w stronę Otwocka · najbliższe odjazdy</div>${deps(lugi, 14)}
-     <div class="label">Danuty · M1</div>${deps(m1, 7)}
+     <div class="label">Danuty · M1 · w stronę Otwocka</div>${deps(m1, 7)}
      <div class="src">Rozkłady przepisane 25 listopada 2026 (Ługi: wersja na czas remontu, ważna od 21.09.2026). Święta nie są rozpoznawane.<br>
      Sprawdź, czy są aktualne: woloszka.com.pl/karczew-osiedle-lugi</div>`);
 }
