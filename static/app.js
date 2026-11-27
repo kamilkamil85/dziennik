@@ -370,10 +370,15 @@ async function show(refresh = false) {
 // Kolory każdego dziecka (po numerze z konfiguracji: 1 = Tadek, 2 = Hela, 3 = Jadzia).
 // Szczęśliwy numerek pokazujemy tylko tym dzieciom (1 = Tadek, 2 = Hela, 3 = Jadzia).
 const LUCKY_KIDS = [2, 3];
-const THEMES = { 1: "legia", 2: "fiolet", 3: "magia" };
+const THEMES = { 1: "legia", 2: "fiolet", 3: "dolina" };
+// Dzieci, które mogą same przełączać wygląd (przycisk z paletą u góry). Pierwszy = domyślny.
+const THEME_CHOICES = { 3: ["dolina", "magia"] };
 function applyTheme() {
-  // ?motyw=dolina pozwala obejrzeć inny motyw bez zmiany ustawień
-  const t = new URLSearchParams(location.search).get("motyw") || THEMES[kid] || "";
+  // ?motyw=... pozwala obejrzeć inny motyw bez zmiany ustawień
+  const choices = THEME_CHOICES[kid] || [];
+  const saved = store("motyw" + kid);
+  const t = new URLSearchParams(location.search).get("motyw") || (choices.includes(saved) ? saved : "") || THEMES[kid] || "";
+  $("#theme").hidden = choices.length < 2;
   document.documentElement.dataset.theme = t;
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue("--bar").trim() || "#1f6f5c";
@@ -383,6 +388,12 @@ function drawKids() {
   applyTheme();
 }
 
+$("#theme").onclick = () => {
+  const choices = THEME_CHOICES[kid] || [];
+  const cur = document.documentElement.dataset.theme;
+  store("motyw" + kid, choices[(choices.indexOf(cur) + 1) % choices.length]);
+  applyTheme();
+};
 $("#kids").onclick = (e) => {
   const b = e.target.closest(".kid"); if (!b) return;
   kid = Number(b.dataset.n); store("kid", String(kid)); drawKids(); show();
