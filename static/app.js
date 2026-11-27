@@ -372,7 +372,7 @@ async function show(refresh = false) {
 const LUCKY_KIDS = [2, 3];
 const THEMES = { 1: "legia", 2: "fiolet", 3: "dolina" };
 // Dzieci, które mogą same przełączać wygląd (przycisk z paletą u góry). Pierwszy = domyślny.
-const THEME_CHOICES = { 3: ["dolina", "magia"] };
+const THEME_CHOICES = { 1: ["legia", "rasta"], 2: ["fiolet", "latte"], 3: ["dolina", "magia"] };
 function applyTheme() {
   // ?motyw=... pozwala obejrzeć inny motyw bez zmiany ustawień
   const choices = THEME_CHOICES[kid] || [];

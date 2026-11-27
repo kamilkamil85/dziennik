@@ -298,3 +298,61 @@ dialog form { text-align: right; }
   :root[data-theme="dolina"] .kid.on { box-shadow: 0 3px 0 #b8952f; }
   :root[data-theme="dolina"] .date-box { color: var(--ink); }
 }
+
+/* ---------- Tadek, drugi motyw: reggae (czerń, zieleń, żółć, czerwień) ---------- */
+:root[data-theme="rasta"] {
+  --bg: #0f0f0d; --card: #1a1a17; --ink: #f4efe1; --muted: #a8a392; --line: #2f2e29;
+  --brand: #f5c518; --brand-ink: #0f0f0d; --chip: #24231f; --bar: #0f0f0d;
+  --green: #1f9a4b; --gold: #f5c518; --red: #d6342a;
+  --warn: #ffffff; --warn-bg: #d6342a; --sub: #0f0f0d; --sub-bg: #f5c518; --good: #3fc06d;
+  --stripe: linear-gradient(90deg, #1f9a4b 0 33.3%, #f5c518 33.3% 66.6%, #d6342a 66.6%); --radius: 14px;
+}
+:root[data-theme="rasta"] body { font-family: "Inter", system-ui, sans-serif; }
+:root[data-theme="rasta"] .top { border-bottom-width: 6px; }
+:root[data-theme="rasta"] .kid { font-weight: 800; text-transform: uppercase; }
+:root[data-theme="rasta"] .kid.on { background: var(--gold); color: #0f0f0d; box-shadow: inset 0 -4px 0 var(--green); }
+:root[data-theme="rasta"] h2 { font-family: "Bebas Neue", Impact, sans-serif; font-size: 30px; letter-spacing: .03em; color: var(--ink); margin-top: 18px; }
+:root[data-theme="rasta"] h2:not(.day-head)::after, :root[data-theme="rasta"] .day-label::after {
+  content: ""; display: inline-block; width: 42px; height: 6px; margin-left: 10px; vertical-align: middle; border-radius: 3px; background: var(--stripe); }
+:root[data-theme="rasta"] .lucky-chip { font-family: "Inter", sans-serif; }
+:root[data-theme="rasta"] .card { border: 1px solid var(--line); box-shadow: none; }
+:root[data-theme="rasta"] .lesson { border-top: 1px solid var(--line); }
+:root[data-theme="rasta"] .lesson .no { font-family: "Bebas Neue", Impact, sans-serif; font-size: 30px; color: var(--gold); font-weight: 400; }
+:root[data-theme="rasta"] .subj { font-weight: 800; }
+:root[data-theme="rasta"] .tag.ev-test { background: var(--red); color: #fff; }
+:root[data-theme="rasta"] .tabs { border-top: 3px solid var(--green); background: #0f0f0d; }
+:root[data-theme="rasta"] .tabs button { text-transform: uppercase; font-weight: 800; }
+:root[data-theme="rasta"] .tabs button.on { color: var(--gold); }
+:root[data-theme="rasta"] .date-box { background: var(--green); color: #fff; }
+:root[data-theme="rasta"] .date-box span { color: #fff; opacity: .85; }
+
+/* ---------- Hela, drugi motyw: latte (beż, karmel, pudrowy róż, elegancka kursywa) ---------- */
+:root[data-theme="latte"] {
+  --bg: #f5eee5; --card: #fffaf4; --ink: #4b3a30; --muted: #9b8676; --line: #eadfd2;
+  --brand: #a8755a; --brand-ink: #fffaf4; --chip: #eee3d6; --bar: #c9a48a; --soft: #f2e5d8; --blush: #e9b8b5;
+  --warn: #8c3b3b; --warn-bg: #f6d8d4; --sub: #6f4a1c; --sub-bg: #f5e3c7;
+  --stripe: linear-gradient(90deg, #e9d7c4, #e9b8b5, #d8bfa6); --radius: 20px;
+}
+:root[data-theme="latte"] body { font-family: "Quicksand", system-ui, sans-serif; font-weight: 500; }
+:root[data-theme="latte"] .subj, :root[data-theme="latte"] .kid, :root[data-theme="latte"] .btn,
+:root[data-theme="latte"] .cat, :root[data-theme="latte"] b { font-weight: 700; }
+:root[data-theme="latte"] h2 { font-family: "Playfair Display", Georgia, serif; font-style: italic; font-weight: 500;
+  font-size: 22px; text-transform: lowercase; letter-spacing: .01em; color: var(--brand); }
+:root[data-theme="latte"] .subj, :root[data-theme="latte"] .tabs button, :root[data-theme="latte"] .cat { text-transform: lowercase; }
+:root[data-theme="latte"] .card { border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(168,117,90,.08); }
+:root[data-theme="latte"] .lesson { border-top: 1px solid var(--line); }
+:root[data-theme="latte"] .lesson .no { font-family: "Playfair Display", Georgia, serif; font-style: italic; color: var(--brand); font-size: 18px; }
+:root[data-theme="latte"] .kid.on { background: var(--brand); }
+:root[data-theme="latte"] .kid.on::after { content: " ♡"; }
+:root[data-theme="latte"] .tag { border-radius: 999px; }
+:root[data-theme="latte"] .date-box { background: var(--blush); color: #4b3a30; border-radius: 16px; }
+:root[data-theme="latte"] .date-box span { color: #4b3a30; opacity: .75; }
+:root[data-theme="latte"] .lucky-chip b { color: #c0706b; }
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="latte"] {
+    --bg: #1f1815; --card: #2a211d; --ink: #f2e6da; --muted: #b8a596; --line: #3b2f29;
+    --brand: #e0b48f; --brand-ink: #1f1815; --chip: #342924; --bar: #1f1815; --soft: #3a2d27; --blush: #8f5d5a;
+  }
+  :root[data-theme="latte"] .date-box, :root[data-theme="latte"] .date-box span { color: #fff5ec; }
+}
