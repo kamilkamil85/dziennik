@@ -18,7 +18,7 @@
   --good: #2e9a5e; --mid: #d19a1c; --bad: #d0493a; }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-body { padding: 34px 44px 26px; display: grid; grid-template-rows: auto auto minmax(0, 1fr); grid-row-gap: 26px; overflow: hidden; }
+body { padding: 34px 44px 66px; display: grid; grid-template-rows: auto auto minmax(0, 1fr); grid-row-gap: 26px; overflow: hidden; }
 svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.12em; }
 
 /* góra: zegar | pogoda */
@@ -150,6 +150,7 @@ body.evening { --bg: #131413; --ink: #ecece8; --muted: #a9aca8; --soft: #868985;
 body.evening .tbtn:not(.run):not(.ring), body.evening .tm button:not(.go), body.evening .tm .dep:not(.first) { background: #262725; color: var(--ink); }
 body.evening .lock button { background: #ecece8; color: #131413; }
 body.evening .tm.ring { background: #3a1714; }
+.more { font-size: 15px; font-weight: 600; color: var(--accent); }
 </style>
 </head>
 <body>
@@ -339,6 +340,23 @@ function renderWeek() {
     h += `<div class="${cls}"><div class="dh"><b>${title}</b><span>${i === 1 ? DSHORT[date.getDay()] + " " : ""}${date.getDate()}.${String(date.getMonth() + 1).padStart(2, "0")}</span></div>${body}</div>`;
   }
   $("#week").innerHTML = h;
+  fitDays();
+}
+// Gdy w dniu jest za dużo, najpierw pomniejszamy całą kolumnę (do 72%), a dopiero potem chowamy ostatnie wpisy z dopiskiem "+N więcej".
+function fitDays() {
+  for (const day of document.querySelectorAll(".day")) {
+    const over = () => day.scrollHeight > day.clientHeight + 1;
+    for (let z = 1; over() && z > 0.72; ) { z = Math.round((z - 0.04) * 100) / 100; day.style.zoom = z; }
+    const items = [...day.children].slice(1); // bez nagłówka dnia
+    let hidden = 0;
+    while (over() && items.length > 1) { items.pop().remove(); hidden++; }
+    if (hidden) {
+      const more = document.createElement("div");
+      more.className = "more"; more.textContent = `+${hidden} więcej`;
+      day.appendChild(more);
+      while (over() && day.children.length > 3) { day.children[day.children.length - 2].remove(); more.textContent = `+${++hidden} więcej`; }
+    }
+  }
 }
 function renderCommute() {
   const c = board?.commute, now = clock(), hr = now.getHours() + now.getMinutes() / 60;
