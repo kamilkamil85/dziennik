@@ -372,7 +372,8 @@ async function show(refresh = false) {
 const LUCKY_KIDS = [2, 3];
 const THEMES = { 1: "legia", 2: "fiolet", 3: "magia" };
 function applyTheme() {
-  const t = THEMES[kid] || "";
+  // ?motyw=dolina pozwala obejrzeć inny motyw bez zmiany ustawień
+  const t = new URLSearchParams(location.search).get("motyw") || THEMES[kid] || "";
   document.documentElement.dataset.theme = t;
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue("--bar").trim() || "#1f6f5c";

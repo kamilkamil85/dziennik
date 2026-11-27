@@ -247,3 +247,54 @@ dialog form { text-align: right; }
 .cal-legend .dot { margin-right: 4px; }
 :root[data-theme="legia"] .seg, :root[data-theme="legia"] .seg button, :root[data-theme="legia"] .cal-day { border-radius: 0; }
 :root[data-theme="legia"] .seg button { text-transform: uppercase; font-weight: 800; }
+
+/* ---------- Propozycja dla Jadzi: baśniowa dolina (podgląd: ?motyw=dolina) ----------
+   Skandynawska książeczka: kremowy papier, akwarelowe niebo, zielone wzgórza, morze, ręczne pismo. */
+:root[data-theme="dolina"] {
+  --bg: #f6f1e4; --card: #fffaf0; --ink: #2f4253; --muted: #6f8190; --line: #e4dccb;
+  --brand: #3f7fa6; --brand-ink: #fffaf0; --chip: #e9efe6; --bar: #3f7fa6;
+  --hill: #a9c99a; --hill2: #86b27c; --sea: #9cc7de; --rose: #e79a9a; --sun: #f3cf6b;
+  --radius: 22px;
+}
+:root[data-theme="dolina"] body {
+  font-family: "Quicksand", system-ui, sans-serif;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 90' preserveAspectRatio='none'%3E%3Cpath d='M0 60 Q60 20 130 48 T260 40 T400 52 V90 H0Z' fill='%23a9c99a'/%3E%3Cpath d='M0 75 Q90 45 190 70 T400 66 V90 H0Z' fill='%2386b27c'/%3E%3C/svg%3E") left 0 bottom calc(64px + env(safe-area-inset-bottom)) / 100% 90px no-repeat fixed,
+    radial-gradient(circle at 85% 6%, rgba(243,207,107,.55) 0 38px, transparent 39px),
+    linear-gradient(#dcecf4 0, #f6f1e4 260px) fixed;
+}
+:root[data-theme="dolina"] h2,
+:root[data-theme="dolina"] .subj,
+:root[data-theme="dolina"] .kid,
+:root[data-theme="dolina"] .tabs button,
+:root[data-theme="dolina"] .cat,
+:root[data-theme="dolina"] h3 { font-family: "Patrick Hand", "Quicksand", sans-serif; letter-spacing: .01em; }
+:root[data-theme="dolina"] h2 { font-size: 20px; text-transform: none; color: var(--brand); }
+:root[data-theme="dolina"] .subj { font-size: 19px; }
+:root[data-theme="dolina"] h2:not(.day-head)::after, :root[data-theme="dolina"] .day-label::after {
+  content: ""; display: inline-block; width: 46px; height: 8px; margin-left: 10px; vertical-align: middle;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 8'%3E%3Cpath d='M1 4 Q6.5 0 12 4 T23 4 T34 4 T45 4' fill='none' stroke='%239cc7de' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat; }
+:root[data-theme="dolina"] .card { border: 1.5px solid var(--line); box-shadow: 0 3px 0 rgba(63,127,166,.10); }
+:root[data-theme="dolina"] .kid.on { background: var(--brand); box-shadow: 0 3px 0 #2c6386; }
+:root[data-theme="dolina"] .date-box { background: var(--sea); color: var(--ink); }
+:root[data-theme="dolina"] .date-box span { color: var(--ink); opacity: .75; }
+:root[data-theme="dolina"] .tabs { border-top: 3px solid var(--hill2); background: var(--card); }
+:root[data-theme="dolina"] .lucky-chip b { color: var(--rose); }
+@media (prefers-color-scheme: dark) {
+  /* noc w dolinie: granatowe niebo, księżyc, ciemne wzgórza */
+  :root[data-theme="dolina"] {
+    --bg: #17233a; --card: #1f2d47; --ink: #eef0e6; --muted: #a8b4c4; --line: #2d3d5c;
+    --brand: #f3cf6b; --brand-ink: #17233a; --chip: #263654; --bar: #17233a; --sea: #2f5f86;
+  }
+  :root[data-theme="dolina"] body {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 90' preserveAspectRatio='none'%3E%3Cpath d='M0 60 Q60 20 130 48 T260 40 T400 52 V90 H0Z' fill='%232b4a3c'/%3E%3Cpath d='M0 75 Q90 45 190 70 T400 66 V90 H0Z' fill='%23223b31'/%3E%3C/svg%3E") left 0 bottom calc(64px + env(safe-area-inset-bottom)) / 100% 90px no-repeat fixed,
+      radial-gradient(circle at 85% 6%, #f3e7b8 0 22px, transparent 23px),
+      radial-gradient(1px 1px at 20% 12%, #fff9 50%, transparent 51%),
+      radial-gradient(1px 1px at 55% 6%, #fff8 50%, transparent 51%),
+      radial-gradient(1px 1px at 35% 22%, #fff7 50%, transparent 51%),
+      var(--bg);
+  }
+  :root[data-theme="dolina"] .kid.on { box-shadow: 0 3px 0 #b8952f; }
+  :root[data-theme="dolina"] .date-box { color: var(--ink); }
+}
