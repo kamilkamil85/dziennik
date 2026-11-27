@@ -151,6 +151,9 @@ body.evening .tbtn:not(.run):not(.ring), body.evening .tm button:not(.go), body.
 body.evening .lock button { background: #ecece8; color: #131413; }
 body.evening .tm.ring { background: #3a1714; }
 .more { font-size: 15px; font-weight: 600; color: var(--accent); }
+.tm .day.full { border: 0; padding: 0; overflow: auto; columns: 2; column-gap: 48px; }
+.tm .day.full > * { break-inside: avoid; margin: 0 0 16px; }
+.day[data-i] { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -297,6 +300,13 @@ function ownerColor(title) {
   }
   return null;
 }
+const dayFull = [];
+// dotknięcie dnia (np. z dopiskiem "+N więcej") pokazuje go w całości na pełnym ekranie
+document.addEventListener("click", (e) => {
+  const day = e.target.closest(".day"); if (!day || !dayFull[day.dataset.i]) return;
+  const f = dayFull[day.dataset.i];
+  tmOpen(head(f.title.charAt(0).toUpperCase() + f.title.slice(1)) + `<div class="day big full">${f.body}</div>`);
+});
 function renderWeek() {
   if (!board) return;
   const now = clock(), evening = now.getHours() >= TOMORROW_FROM;
@@ -337,7 +347,8 @@ function renderWeek() {
     body += evs.map((e) => `<div class="ev" style="--c:${esc(ownerColor(e.title) || e.color || "#888")}">${e.allDay ? "" : `<span class="h">${hm(e.from)}${e.to && i === 0 ? "–" + hm(e.to) : ""}</span> `}${esc(e.title)}</div>`).join("");
     if (date.getDate() === 18 && i > 0) body = `<div class="cov-tag">Dzień Przymierza</div>` + body;
     if (!body) body = `<div class="small">${weekend ? "wolne" : "—"}</div>`;
-    h += `<div class="${cls}"><div class="dh"><b>${title}</b><span>${i === 1 ? DSHORT[date.getDay()] + " " : ""}${date.getDate()}.${String(date.getMonth() + 1).padStart(2, "0")}</span></div>${body}</div>`;
+    dayFull[i] = { title: i < 2 ? `${title}, ${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()]}` : `${DAYS[date.getDay()]}, ${date.getDate()} ${MONTHS[date.getMonth()]}`, body };
+    h += `<div class="${cls}" data-i="${i}"><div class="dh"><b>${title}</b><span>${i === 1 ? DSHORT[date.getDay()] + " " : ""}${date.getDate()}.${String(date.getMonth() + 1).padStart(2, "0")}</span></div>${body}</div>`;
   }
   $("#week").innerHTML = h;
   fitDays();
@@ -352,9 +363,9 @@ function fitDays() {
     while (over() && items.length > 1) { items.pop().remove(); hidden++; }
     if (hidden) {
       const more = document.createElement("div");
-      more.className = "more"; more.textContent = `+${hidden} więcej`;
+      more.className = "more"; more.textContent = `+${hidden} więcej · dotknij`;
       day.appendChild(more);
-      while (over() && day.children.length > 3) { day.children[day.children.length - 2].remove(); more.textContent = `+${++hidden} więcej`; }
+      while (over() && day.children.length > 3) { day.children[day.children.length - 2].remove(); more.textContent = `+${++hidden} więcej · dotknij`; }
     }
   }
 }
